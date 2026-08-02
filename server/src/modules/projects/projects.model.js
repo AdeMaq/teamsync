@@ -1,0 +1,27 @@
+import mongoose from 'mongoose';
+
+const projectSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true, trim: true },
+    description: { type: String, default: '' },
+    workspace: { type: mongoose.Schema.Types.ObjectId, ref: 'Workspace', required: true, index: true },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    members: [
+      {
+        user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+        role: { type: String, enum: ['lead', 'contributor', 'viewer'], default: 'contributor' },
+      },
+    ],
+    status: {
+      type: String,
+      enum: ['planning', 'active', 'on-hold', 'completed', 'archived'],
+      default: 'planning',
+    },
+    color: { type: String, default: '#2DD4BF' },
+    startDate: { type: Date },
+    endDate: { type: Date },
+  },
+  { timestamps: true }
+);
+
+export default mongoose.model('Project', projectSchema);
