@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import AuthLayout from '../components/layout/AuthLayout';
-import Input from '../components/ui/Input';
-import Button from '../components/ui/Button';
+import AuthLayout from '../shared/layout/AuthLayout';
+import Input from '../shared/ui/Input';
+import Button from '../shared/ui/Button';
 
 export default function LoginPage() {
   const [form, setForm] = useState({ email: '', password: '' });
