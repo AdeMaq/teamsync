@@ -147,7 +147,21 @@ Rules:
 - Collection names are Mongoose's pluralised lowercase names (`RefreshToken` -> `refreshtokens`). A migration with the wrong name would index a different collection.
 - Syntax-checked with `node --check`; **not yet run against a database**.
 
+### 2026-10-10 - Auth: register / login / refresh / logout / me (server + client)
+- **Server:** `app.js` (helmet, cors with credentials, json, cookie-parser, morgan -> winston, `/health`, `/api/v1`, 404 + error handler). Core: `HTTP` codes, `ERROR_CODES`, `ApiError`, `sendSuccess`, `asyncHandler`, token utils, `validate` / `requireAuth` / `authLimiter` / error middleware.
+- **Endpoints:** `POST /api/v1/auth/register | login | refresh | logout`, `GET /api/v1/users/me`.
+- **Tokens:** access JWT (15m) returned in the body and kept in memory on the client. Refresh JWT (7d, signed with `JWT_REFRESH_SECRET`, random `jwtid`) travels only in an `httpOnly` cookie (`refreshToken`, path `/api/v1/auth`, `sameSite=lax`, `secure` in production). Only a SHA-256 hash of the refresh token is stored.
+- **Rotation + reuse detection:** each refresh revokes the old token and issues a new one in the same `family`. Presenting a revoked token revokes the whole family.
+- **Login hardening:** one generic `INVALID_CREDENTIALS` error for unknown email and wrong password, with a dummy bcrypt compare so timing matches. bcrypt cost 12; password max 72 (bcrypt limit). `authLimiter` on register/login/refresh.
+- **Module boundary example:** `auth` reaches users only via `modules/users/index.js` (`usersService`).
+- **Client:** RTK Query is the only HTTP layer (`shared/api/baseApi.js`, `baseQuery.js` with single-flight silent refresh on 401). `features/auth` holds slice, `authApi`, `useBootstrapAuth`, `LoginForm`, `RegisterForm`. `ProtectedRoute` / `GuestRoute` guard routes. `LoginPage` / `RegisterPage` are now thin; the original markup moved into the forms unchanged.
+- **Documented exception:** `shared/api/baseQuery.js` imports `features/auth/slice` directly (not `index.js`) to avoid an import cycle; auth state is core infrastructure.
+- **Removed:** empty `shared/api/axiosInstance.js` (RTK Query's `fetchBaseQuery` replaces it). Client `VITE_API_BASE_URL` now `.../api/v1`.
+- `pages/WorkspacePage.jsx` is a **placeholder** (greeting + logout) until the workspaces step.
+- **Not yet verified:** server code is syntax-checked only (Docker was down, no live run); client not built (`node_modules` not installed).
+- **Known limitation:** two browser tabs refreshing at the exact same moment can trip reuse detection and log the user out. Single-tab races are prevented by the single-flight refresh.
+- **Not done:** forgot/reset password, email verification, tests.
+
 ### Known issues carried over
-- `server.js` imports `app.js`, which is still empty -> server cannot start yet.
 - Client has both `tailwindcss@3` and `@tailwindcss/vite@4` installed; only v3 is used.
 - `/forgot-password` link on LoginPage has no route yet.

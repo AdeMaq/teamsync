@@ -4,14 +4,15 @@ import { selectAuthStatus } from '../../features/auth';
 import { ROUTES } from '../../app/routes/routePaths';
 import Loader from './Loader';
 
-// Pages that need a logged-in user. The server enforces access too; this is only for navigation.
-export default function ProtectedRoute() {
+// Login/Register: logged-in users are sent on to where they were headed (or the workspaces page).
+export default function GuestRoute() {
   const status = useSelector(selectAuthStatus);
   const location = useLocation();
 
   if (status === 'checking') return <Loader />;
-  if (status !== 'authenticated') {
-    return <Navigate to={ROUTES.login} replace state={{ from: location }} />;
+  if (status === 'authenticated') {
+    const from = location.state?.from?.pathname;
+    return <Navigate to={from ?? ROUTES.workspaces} replace />;
   }
   return <Outlet />;
 }
