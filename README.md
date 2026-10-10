@@ -29,7 +29,7 @@ teamsync/
 └── README.md
 ```
 
-The architecture (modular monolith, feature-based, strictly layered) and the rules every change must follow are documented in [ARCHITECTURE.md](ARCHITECTURE.md). Read it before contributing.
+The architecture (modular monolith, feature-based, strictly layered) and the rules every change must follow are documented in [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Prerequisites
 
