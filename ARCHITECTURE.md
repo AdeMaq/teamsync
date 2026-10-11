@@ -162,6 +162,18 @@ Rules:
 - **Known limitation:** two browser tabs refreshing at the exact same moment can trip reuse detection and log the user out. Single-tab races are prevented by the single-flight refresh.
 - **Not done:** forgot/reset password, email verification, tests.
 
+### 2026-10-11 - Landing page, app shell and dashboard (client only)
+- **Routes:** `/` public landing page. `/login`, `/register` behind `GuestRoute`. `/dashboard`, `/projects`, `/messages`, `/team`, `/settings` behind `ProtectedRoute` and rendered inside `AppShell`. Unknown paths redirect to `/`.
+- **Redirect flow:** landing buttons link straight to protected routes (`Open workspace`, `Explore the demo` -> `/dashboard`; `See a Kanban board` -> `/projects`; `Get started free` -> `/register`). Logged out: `ProtectedRoute` sends the visitor to `/login` with `state.from`, and after login `GuestRoute` returns them there. Logged in: they land directly on the target. With no `from`, the default destination is `/dashboard`.
+- **Landing:** `features/landing` (`LandingNavbar`, `Hero`, `KanbanMockup`, `Features`, `CtaBanner`, `LandingFooter`), composed by `pages/HomePage.jsx`. Space Grotesk (`font-display`) and DM Sans (`font-landing`) are used on the landing page only; the app keeps Inter. New Tailwind tokens: `bg-hero-glow`, `bg-cta-glow`.
+- **App shell:** `shared/layout/AppShell` (fixed `Sidebar`, sticky `Navbar`, mobile slide-out menu). Nav links and top-bar titles come from one list in `shared/layout/navItems.jsx`. Sidebar is 256px (`w-64`), fixed from 768px up and a slide-out drawer below that (superseded the first guide's 380px, which was too wide).
+- **Dashboard theme:** the app keeps ONE colour scheme: navy `#070B14`, slate card `#131A2B`, border `#232B45`, muted `#8B95A7`, teal `#2DD4BF`, gradient `#2DD4BF -> #3B82F6`. The dashboard reads it through `dash.*` tokens in `tailwind.config.js` (aliases with the same values), plus `bg-dash-gradient` / `bg-dash-bar`. The second design spec's different hex palette was tried and reverted because it broke consistency with login and landing; only its sizes, spacing and fonts (DM Sans `font-body`, Space Grotesk `font-display`) were kept. To retheme, change the values in one place. Sizes follow the spec: 12/14/16/18/20/30px type, 36px nav items and inputs, 20px card padding, 16px gaps. Breakpoints: stats 4 across at 1280px+, 2x2 from 768px, one column below; the 2/3 + 1/3 rows hold from 768px.
+- **Dashboard:** `features/dashboard` components (`StatsCard`, `ActivityChart`, `ActivityFeed`, `ProjectHealth`, `Workload`) rendered by `pages/DashboardPage.jsx`.
+- **Shared UI added:** `Card`, `Avatar`, `Logo`, `icons.jsx` (inline SVG, no icon package).
+- **STATIC SAMPLE DATA:** the dashboard numbers live in `features/dashboard/mockData.js`; the workspace card in `Sidebar.jsx`; the "4" notification badge and search box in `Navbar.jsx`; the sprint subtitle in `navItems.jsx`. Replace with API data as those modules are built. The sidebar user card shows the real logged-in name and email.
+- `projects`, `messages`, `team`, `settings` use `PlaceholderPage` until built. Removed the earlier `WorkspacePage` placeholder.
+- **Verified:** `vite build` succeeds and `oxlint` reports no errors (only empty-scaffold-file warnings), run on a copy in a scratch folder. **Not verified visually in a browser.**
+
 ### Known issues carried over
 - Client has both `tailwindcss@3` and `@tailwindcss/vite@4` installed; only v3 is used.
 - `/forgot-password` link on LoginPage has no route yet.
