@@ -4,7 +4,7 @@ import { selectAuthStatus } from '../../features/auth';
 import { ROUTES } from '../../app/routes/routePaths';
 import Loader from './Loader';
 
-// Login/Register: logged-in users are sent on to where they were headed (or the workspaces page).
+// Login/Register: logged-in users are sent on to where they were headed (or the dashboard).
 export default function GuestRoute() {
   const status = useSelector(selectAuthStatus);
   const location = useLocation();
@@ -12,7 +12,7 @@ export default function GuestRoute() {
   if (status === 'checking') return <Loader />;
   if (status === 'authenticated') {
     const from = location.state?.from?.pathname;
-    return <Navigate to={from ?? ROUTES.workspaces} replace />;
+    return <Navigate to={from ?? ROUTES.dashboard} replace />;
   }
   return <Outlet />;
 }
