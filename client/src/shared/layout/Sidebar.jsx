@@ -1,8 +1,10 @@
-import { NavLink } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { selectCurrentUser, useLogoutMutation } from '../../features/auth';
+import { selectCurrentUser } from '../../features/auth';
+import { ROUTES } from '../../app/routes/routePaths';
+import { assetUrl } from '../utils/assetUrl';
 import Avatar from '../ui/Avatar';
-import { CloseIcon, LogoutIcon } from '../ui/icons';
+import { CloseIcon } from '../ui/icons';
 import { NAV_ITEMS } from './navItems';
 
 // PLACEHOLDER until workspaces exist in the backend: replace with the active workspace from the API.
@@ -19,7 +21,6 @@ const linkClass = ({ isActive }) =>
 // closes on navigation or backdrop click.
 export default function Sidebar({ open, onClose }) {
   const user = useSelector(selectCurrentUser);
-  const [logout, { isLoading }] = useLogoutMutation();
 
   return (
     <>
@@ -62,23 +63,19 @@ export default function Sidebar({ open, onClose }) {
           ))}
         </nav>
 
-        <div className="mt-auto flex items-center gap-3 rounded-2xl border border-dash-border bg-dash-card p-3">
-          <Avatar name={user?.name} size="md" />
+        {/* The whole card opens the profile page (photo, email, log out, delete account). */}
+        <Link
+          to={ROUTES.profile}
+          aria-label="Open your profile"
+          className="mt-auto flex items-center gap-3 rounded-2xl border border-dash-border bg-dash-card p-3
+            transition-colors hover:border-[#2F3A5C]"
+        >
+          <Avatar name={user?.name} src={assetUrl(user?.avatar)} size="md" />
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold text-dash-text">{user?.name}</p>
             <p className="truncate text-xs text-dash-muted">{user?.email}</p>
           </div>
-          <button
-            type="button"
-            onClick={() => logout()}
-            disabled={isLoading}
-            className="rounded-lg p-1.5 text-dash-muted transition-colors hover:text-dash-text disabled:opacity-50"
-            aria-label="Log out"
-            title="Log out"
-          >
-            <LogoutIcon size={16} />
-          </button>
-        </div>
+        </Link>
       </aside>
     </>
   );

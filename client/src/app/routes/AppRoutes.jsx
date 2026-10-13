@@ -7,6 +7,7 @@ import HomePage from '../../pages/HomePage';
 import LoginPage from '../../pages/LoginPage';
 import RegisterPage from '../../pages/RegisterPage';
 import DashboardPage from '../../pages/DashboardPage';
+import ProfilePage from '../../pages/ProfilePage';
 import PlaceholderPage from '../../pages/PlaceholderPage';
 import { ROUTES } from './routePaths';
 
@@ -32,6 +33,7 @@ export default function AppRoutes() {
           <Route path={ROUTES.messages} element={<PlaceholderPage title="Messages" />} />
           <Route path={ROUTES.team} element={<PlaceholderPage title="Team" />} />
           <Route path={ROUTES.settings} element={<PlaceholderPage title="Settings" />} />
+          <Route path={ROUTES.profile} element={<ProfilePage />} />
         </Route>
       </Route>
 

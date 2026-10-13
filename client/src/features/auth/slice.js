@@ -18,6 +18,10 @@ const authSlice = createSlice({
       state.accessToken = payload.accessToken;
       state.status = 'authenticated';
     },
+    // The signed-in user's profile changed (avatar, email). The session itself is untouched.
+    userUpdated(state, { payload }) {
+      state.user = payload;
+    },
     loggedOut(state) {
       state.user = null;
       state.accessToken = null;
@@ -26,7 +30,7 @@ const authSlice = createSlice({
   },
 });
 
-export const { setCredentials, loggedOut } = authSlice.actions;
+export const { setCredentials, userUpdated, loggedOut } = authSlice.actions;
 
 export const selectCurrentUser = (state) => state.auth.user;
 export const selectAuthStatus = (state) => state.auth.status;
