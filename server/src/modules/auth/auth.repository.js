@@ -13,3 +13,6 @@ export const revokeRefreshToken = (id, replacedByTokenHash) =>
 // Revokes every still-active token issued from one login (used on reuse detection).
 export const revokeTokenFamily = (family) =>
   RefreshToken.updateMany({ family, revoked: false }, { $set: { revoked: true, revokedAt: new Date() } });
+
+// Used when the account is deleted: removes the user's tokens outright.
+export const deleteRefreshTokensByUser = (userId) => RefreshToken.deleteMany({ user: userId });

@@ -174,6 +174,17 @@ Rules:
 - `projects`, `messages`, `team`, `settings` use `PlaceholderPage` until built. Removed the earlier `WorkspacePage` placeholder.
 - **Verified:** `vite build` succeeds and `oxlint` reports no errors (only empty-scaffold-file warnings), run on a copy in a scratch folder. **Not verified visually in a browser.**
 
+### 2026-10-13 - Profile page: avatar, email, log out, delete account
+- **Entry point:** the sidebar user card is a link to `/profile` (inside `AppShell`). The card's small logout icon was removed; logging out now lives on the profile page.
+- **Endpoints (all need `requireAuth`):** `PATCH /api/v1/users/me/email`, `POST /api/v1/users/me/avatar` (multipart field `avatar`), `DELETE /api/v1/users/me/avatar`, `DELETE /api/v1/users/me`. Email change and account deletion require the current password and share `authLimiter`.
+- **Wrong password = `403 INVALID_PASSWORD`, never 401.** The client treats a 401 on a normal request as "access token expired" and silently refreshes; a 401 here would trigger that by mistake.
+- **Avatars:** stored on local disk in `server/uploads/avatars/<userId>-<random>.<ext>` (gitignored); `user.avatar` holds the relative URL `/uploads/avatars/...`. Limits: JPEG/PNG/WebP, 2 MB. The extension comes from the verified mime type, and the file's magic bytes are checked after upload (a faked mime type is rejected). Replacing or removing deletes the old file; deletion only touches files inside the avatars folder. Served by `express.static` at `/uploads` with `Cross-Origin-Resource-Policy: cross-origin` (helmet's default would block the React app from showing them). Client builds the URL with `shared/utils/assetUrl.js`.
+- **Delete account:** users service verifies the password, removes the avatar file, emits `USER_DELETED` on `events/eventBus.js`, then deletes the user. `auth.events.js` listens and deletes the user's refresh tokens. **Every future module that owns user data (workspaces, tasks, comments, messages, notifications) must listen for `USER_DELETED` too.** The auth module did not need to import users code for this, which keeps module boundaries intact.
+- **Email change:** `isEmailVerified` is not reset yet because email verification is not built.
+- **Shared:** `core/validation/fields.js` (`emailField`), `config/paths.js`, `ActionButton`, `TextField`, `Avatar` now accepts `src`. The client `auth` slice gained `userUpdated`.
+- **Verified:** server endpoints were exercised live against the local database with a throwaway account (wrong/same/new email, fake image, wrong mime type, no auth, upload/replace/remove avatar, static serving headers, wrong/right password delete, tokens and files cleaned up). Client builds and lints clean on a scratch copy. **Not looked at in a browser.**
+- **Not done:** change name, change password (both are in the original API plan), tests.
+
 ### Known issues carried over
 - Client has both `tailwindcss@3` and `@tailwindcss/vite@4` installed; only v3 is used.
 - `/forgot-password` link on LoginPage has no route yet.

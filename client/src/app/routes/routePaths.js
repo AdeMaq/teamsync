@@ -8,4 +8,5 @@ export const ROUTES = {
   messages: '/messages',
   team: '/team',
   settings: '/settings',
+  profile: '/profile',
 };
