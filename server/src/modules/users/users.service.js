@@ -1,9 +1,9 @@
 import fs from 'fs/promises';
 import path from 'path';
-import bcrypt from 'bcryptjs';
 import ApiError from '../../core/errors/ApiError.js';
 import { ERROR_CODES } from '../../core/errors/errorTypes.js';
 import { HTTP } from '../../core/constants/httpStatusCodes.js';
+import { hashPassword, verifyPassword } from '../../core/utils/password.js';
 import { AVATAR_URL_PREFIX, avatarsDir } from '../../config/paths.js';
 import { eventBus } from '../../events/eventBus.js';
 import { EVENTS } from '../../events/eventNames.js';
@@ -21,6 +21,14 @@ export const findById = (id) => usersRepository.findUserById(id);
 
 export const recordLogin = (id) => usersRepository.updateLastLogin(id);
 
+export const setPasswordResetToken = (id, tokenHash, expiresAt) =>
+  usersRepository.setPasswordResetToken(id, tokenHash, expiresAt);
+
+export const findByValidResetToken = (tokenHash) => usersRepository.findUserByValidResetToken(tokenHash);
+
+// Used by the reset flow: the caller has already hashed the new password.
+export const updatePassword = (id, passwordHash) => usersRepository.updatePasswordAndClearReset(id, passwordHash);
+
 // ---- Profile ----
 
 const notFound = () => new ApiError(HTTP.NOT_FOUND, ERROR_CODES.NOT_FOUND, 'User not found');
@@ -28,11 +36,12 @@ const notFound = () => new ApiError(HTTP.NOT_FOUND, ERROR_CODES.NOT_FOUND, 'User
 const fieldError = (statusCode, code, field, message) =>
   new ApiError(statusCode, code, message, [{ field, message }]);
 
-// Sensitive actions re-check the password. Wrong password is a 403 (not 401) on purpose.
-const assertPassword = async (user, password) => {
-  const ok = await bcrypt.compare(password, user.passwordHash);
+// Sensitive actions re-check the password. Wrong password is a 403 (not 401) on purpose:
+// the client treats a 401 as "access token expired" and would try to refresh instead of showing the error.
+const assertPassword = async (user, password, field = 'password') => {
+  const ok = await verifyPassword(password, user.passwordHash);
   if (!ok) {
-    throw fieldError(HTTP.FORBIDDEN, ERROR_CODES.INVALID_PASSWORD, 'password', 'Incorrect password');
+    throw fieldError(HTTP.FORBIDDEN, ERROR_CODES.INVALID_PASSWORD, field, 'Incorrect password');
   }
 };
 
@@ -62,6 +71,12 @@ export const getUserProfile = async (id) => {
   return user;
 };
 
+export const updateProfile = async (userId, { name }) => {
+  const updated = await usersRepository.updateUserById(userId, { name });
+  if (!updated) throw notFound();
+  return updated;
+};
+
 export const changeEmail = async (userId, { email, password }) => {
   const user = await usersRepository.findUserByIdWithPassword(userId);
   if (!user) throw notFound();
@@ -76,6 +91,27 @@ export const changeEmail = async (userId, { email, password }) => {
   }
 
   return usersRepository.updateUserById(userId, { email });
+};
+
+// Changing the password signs the account out everywhere: auth listens for PASSWORD_CHANGED
+// and deletes the refresh tokens. The caller must log in again.
+export const changePassword = async (userId, { currentPassword, newPassword }) => {
+  const user = await usersRepository.findUserByIdWithPassword(userId);
+  if (!user) throw notFound();
+
+  await assertPassword(user, currentPassword, 'currentPassword');
+
+  if (currentPassword === newPassword) {
+    throw fieldError(
+      HTTP.BAD_REQUEST,
+      ERROR_CODES.VALIDATION_ERROR,
+      'newPassword',
+      'New password must be different from the current one'
+    );
+  }
+
+  await usersRepository.updatePasswordAndClearReset(userId, await hashPassword(newPassword));
+  await eventBus.emit(EVENTS.PASSWORD_CHANGED, { userId });
 };
 
 // `file` is the multer result (already written to the avatars folder).

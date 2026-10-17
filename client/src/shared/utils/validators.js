@@ -16,3 +16,11 @@ export function validateRegister({ name, email, password }) {
   else if (password.length > 72) errors.password = 'Password must be at most 72 characters';
   return errors;
 }
+
+export function validateNewPassword(password, confirm) {
+  const errors = {};
+  if (password.length < 8) errors.password = 'Password must be at least 8 characters';
+  else if (password.length > 72) errors.password = 'Password must be at most 72 characters';
+  if (confirm !== password) errors.confirm = 'Passwords do not match';
+  return errors;
+}

@@ -1,14 +1,11 @@
 import Joi from 'joi';
-import { emailField } from '../../core/validation/fields.js';
-
-// bcrypt only uses the first 72 bytes, so longer passwords are rejected rather than silently truncated.
-const password = Joi.string().min(8).max(72).label('Password');
+import { emailField, nameField, passwordField } from '../../core/validation/fields.js';
 
 export const registerSchema = {
   body: Joi.object({
-    name: Joi.string().trim().min(2).max(100).required().label('Name'),
+    name: nameField.required(),
     email: emailField.required(),
-    password: password.required(),
+    password: passwordField.required(),
   }),
 };
 
@@ -17,5 +14,19 @@ export const loginSchema = {
     email: emailField.required(),
     // No length rules at login: any wrong password must produce the same generic error.
     password: Joi.string().required().label('Password'),
+  }),
+};
+
+export const forgotPasswordSchema = {
+  body: Joi.object({
+    email: emailField.required(),
+  }),
+};
+
+export const resetPasswordSchema = {
+  body: Joi.object({
+    // 32 random bytes, hex encoded (see requestPasswordReset in auth.service.js)
+    token: Joi.string().hex().length(64).required().label('Reset token'),
+    password: passwordField.required(),
   }),
 };
