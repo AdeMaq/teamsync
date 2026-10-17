@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema(
       trim: true,
       match: [/^\S+@\S+\.\S+$/, 'Invalid email format'],
     },
-    // bcrypt hash. Hashing happens in the auth service, not in the model.
+    // bcrypt hash. Hashing happens in the services (core/utils/password.js), not in the model.
     passwordHash: { type: String, required: true, select: false },
     avatar: { type: String, default: '' },
     isEmailVerified: { type: Boolean, default: false },
@@ -21,12 +21,17 @@ const userSchema = new mongoose.Schema(
       default: 'active',
     },
     lastLoginAt: { type: Date },
+    // Forgot-password flow: only a SHA-256 hash of the emailed token is stored, and it expires.
+    passwordResetTokenHash: { type: String, select: false },
+    passwordResetExpiresAt: { type: Date, select: false },
   },
   {
     timestamps: true,
     toJSON: {
       transform: (_doc, ret) => {
         delete ret.passwordHash;
+        delete ret.passwordResetTokenHash;
+        delete ret.passwordResetExpiresAt;
         delete ret.__v;
         return ret;
       },

@@ -7,9 +7,21 @@ export const getMe = asyncHandler(async (req, res) => {
   sendSuccess(res, { user });
 });
 
+export const updateMe = asyncHandler(async (req, res) => {
+  const user = await usersService.updateProfile(req.user.id, req.body);
+  sendSuccess(res, { user });
+});
+
 export const changeEmail = asyncHandler(async (req, res) => {
   const user = await usersService.changeEmail(req.user.id, req.body);
   sendSuccess(res, { user });
+});
+
+// The browser's refresh cookie is left in place: the refresh tokens are gone after this, so the next
+// refresh fails with 401 and the auth controller clears the cookie.
+export const changePassword = asyncHandler(async (req, res) => {
+  await usersService.changePassword(req.user.id, req.body);
+  sendSuccess(res, null);
 });
 
 export const uploadAvatar = asyncHandler(async (req, res) => {
@@ -22,8 +34,6 @@ export const removeAvatar = asyncHandler(async (req, res) => {
   sendSuccess(res, { user });
 });
 
-// The browser's refresh cookie is left in place: the refresh tokens are gone, so the next refresh
-// fails with 401 and the auth controller clears the cookie.
 export const deleteAccount = asyncHandler(async (req, res) => {
   await usersService.deleteAccount(req.user.id, req.body);
   sendSuccess(res, null);

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Input from '../../../shared/ui/Input';
 import Button from '../../../shared/ui/Button';
 import { parseApiError } from '../../../shared/api/errors';
@@ -12,6 +12,7 @@ export default function LoginForm() {
   const [form, setForm] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
   const [login, { isLoading }] = useLoginMutation();
+  const notice = useLocation().state?.notice; // e.g. "Password updated" after a reset or change
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -37,6 +38,12 @@ export default function LoginForm() {
     <div className="bg-slate-card border border-slate-border rounded-2xl p-8 shadow-glow">
       <h2 className="text-xl font-bold text-[#F5F7FA] mb-1">Welcome back</h2>
       <p className="text-sm mb-7 text-muted">Log in to your TeamSync workspace</p>
+
+      {notice && (
+        <p className="mb-5 rounded-lg border border-teal-400/30 bg-teal-400/10 px-3 py-2 text-xs text-teal-300" role="status">
+          {notice}
+        </p>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-5" noValidate>
         <Input

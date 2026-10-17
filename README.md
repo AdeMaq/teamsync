@@ -76,6 +76,7 @@ You can generate one with `node -e "console.log(require('crypto').randomBytes(48
 | `MONGO_URI` | `mongodb://localhost:27017/teamsync` | Database connection. **Must end with the database name.** |
 | `JWT_ACCESS_SECRET` / `JWT_REFRESH_SECRET` | none, required | Token signing secrets |
 | `JWT_ACCESS_EXPIRY` / `JWT_REFRESH_EXPIRY` | `15m` / `7d` | Token lifetimes |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `EMAIL_FROM` | empty | Optional email settings. With no `SMTP_HOST`, password reset links are printed in the server console instead of emailed. |
 | `CLIENT_URL` | `http://localhost:5173` | Allowed CORS origin |
 
 `.env` files are git-ignored. Never commit real secrets.
@@ -120,12 +121,22 @@ npm run dev      # app on http://localhost:5173
 
 Open http://localhost:5173, register an account, and you land on a placeholder page that confirms you are logged in. The new user appears in the `users` collection in Compass.
 
+## Running the tests
+
+```bash
+# from server/ (Docker Desktop and the teamsync-mongo container must be running)
+npm test
+```
+
+Tests use a separate database, `teamsync_test`, on the same local MongoDB (override with `MONGO_URI_TEST`). It is created, filled and dropped by the tests, and they refuse to run against any database whose name does not end in `_test`, so your development data is never touched.
+
 ## Useful commands
 
 | Where | Command | What it does |
 |---|---|---|
 | `server/` | `npm run dev` | API with auto-reload (nodemon) |
 | `server/` | `npm start` | API without reload |
+| `server/` | `npm test` | Run the automated tests |
 | `server/` | `npm run migrate:create <name>` | Create a new migration file |
 | `server/` | `npm run migrate:up` / `migrate:down` / `migrate:status` | Apply / revert / list migrations |
 | `server/` | `docker compose up -d` / `docker compose stop` | Start / stop MongoDB, keeping data |
@@ -146,10 +157,12 @@ Indexes are defined in migrations, **not** in the Mongoose schemas, so there is 
 | Env validation, DB connection, logger | Done |
 | Login / Register UI | Done, wired to the API |
 | Express app, error handling, validation, root router | Done |
-| Auth (register, login, refresh rotation, logout, me) | Done (forgot/reset password and email verification not yet) |
+| Auth (register, login, refresh rotation, logout, forgot/reset password) | Done (email verification not yet) |
+| Profile (photo, name, email, password, delete account) | Done |
+| Automated tests (server) | 82 tests: auth, profile, password reset |
 | Workspaces, projects, tasks, comments | Not started |
 | Real-time messaging, notifications, dashboard | Not started |
-| Tests, CI, Dockerfiles for the apps | Not started |
+| CI, client tests, Dockerfiles for the apps | Not started |
 
 Next up: workspaces (create, list, invite, roles) and the RBAC middleware.
 

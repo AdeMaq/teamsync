@@ -9,7 +9,9 @@
   "migrate:create": "migrate-mongo create -f migrate-mongo-config.cjs",
   "migrate:up": "migrate-mongo up -f migrate-mongo-config.cjs",
   "migrate:down": "migrate-mongo down -f migrate-mongo-config.cjs",
-  "migrate:status": "migrate-mongo status -f migrate-mongo-config.cjs"
+  "migrate:status": "migrate-mongo status -f migrate-mongo-config.cjs",
+  "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
+  "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch"
   },
   "keywords": [],
   "author": "",

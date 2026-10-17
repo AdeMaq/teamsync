@@ -7,6 +7,7 @@ export const ERROR_CODES = Object.freeze({
   // Wrong password on an already-authenticated action (change email, delete account).
   // Deliberately NOT a 401, so the client does not mistake it for an expired session.
   INVALID_PASSWORD: 'INVALID_PASSWORD',
+  INVALID_RESET_TOKEN: 'INVALID_RESET_TOKEN',
   INVALID_TOKEN: 'INVALID_TOKEN',
   TOKEN_EXPIRED: 'TOKEN_EXPIRED',
   FORBIDDEN: 'FORBIDDEN',

@@ -15,10 +15,21 @@ const syncUser = async (_arg, { dispatch, queryFulfilled }) => {
 
 export const profileApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
+    updateName: build.mutation({
+      query: (body) => ({ url: '/users/me', method: 'PATCH', body }),
+      transformResponse: unwrap,
+      onQueryStarted: syncUser,
+    }),
+
     changeEmail: build.mutation({
       query: (body) => ({ url: '/users/me/email', method: 'PATCH', body }),
       transformResponse: unwrap,
       onQueryStarted: syncUser,
+    }),
+
+    // The server ends every session after this, so the component logs the user out locally.
+    changePassword: build.mutation({
+      query: (body) => ({ url: '/users/me/password', method: 'PATCH', body }),
     }),
 
     uploadAvatar: build.mutation({
@@ -45,6 +56,8 @@ export const profileApi = baseApi.injectEndpoints({
 });
 
 export const {
+  useUpdateNameMutation,
+  useChangePasswordMutation,
   useChangeEmailMutation,
   useUploadAvatarMutation,
   useRemoveAvatarMutation,

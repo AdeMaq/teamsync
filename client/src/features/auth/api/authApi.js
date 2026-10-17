@@ -41,6 +41,14 @@ export const authApi = baseApi.injectEndpoints({
       },
     }),
 
+    forgotPassword: build.mutation({
+      query: (body) => ({ url: '/auth/forgot-password', method: 'POST', body }),
+    }),
+
+    resetPassword: build.mutation({
+      query: (body) => ({ url: '/auth/reset-password', method: 'POST', body }),
+    }),
+
     logout: build.mutation({
       query: () => ({ url: '/auth/logout', method: 'POST' }),
       async onQueryStarted(_arg, { dispatch, queryFulfilled }) {
@@ -56,4 +64,11 @@ export const authApi = baseApi.injectEndpoints({
   }),
 });
 
-export const { useRegisterMutation, useLoginMutation, useRefreshMutation, useLogoutMutation } = authApi;
+export const {
+  useRegisterMutation,
+  useLoginMutation,
+  useRefreshMutation,
+  useLogoutMutation,
+  useForgotPasswordMutation,
+  useResetPasswordMutation,
+} = authApi;

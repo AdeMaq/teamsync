@@ -3,6 +3,7 @@ import { env } from './env.js';
 
 const logger = winston.createLogger({
   level: env.NODE_ENV === 'production' ? 'info' : 'debug',
+  silent: env.NODE_ENV === 'test', // keep test output readable
   format: winston.format.combine(
     winston.format.timestamp(),
     winston.format.printf(({ timestamp, level, message }) => `[${timestamp}] ${level.toUpperCase()}: ${message}`)

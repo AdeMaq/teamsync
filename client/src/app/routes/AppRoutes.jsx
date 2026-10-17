@@ -6,6 +6,8 @@ import AppShell from '../../shared/layout/AppShell';
 import HomePage from '../../pages/HomePage';
 import LoginPage from '../../pages/LoginPage';
 import RegisterPage from '../../pages/RegisterPage';
+import ForgotPasswordPage from '../../pages/ForgotPasswordPage';
+import ResetPasswordPage from '../../pages/ResetPasswordPage';
 import DashboardPage from '../../pages/DashboardPage';
 import ProfilePage from '../../pages/ProfilePage';
 import PlaceholderPage from '../../pages/PlaceholderPage';
@@ -24,6 +26,10 @@ export default function AppRoutes() {
         <Route path={ROUTES.login} element={<LoginPage />} />
         <Route path={ROUTES.register} element={<RegisterPage />} />
       </Route>
+
+      {/* Password recovery works whether or not the visitor is logged in */}
+      <Route path={ROUTES.forgotPassword} element={<ForgotPasswordPage />} />
+      <Route path={ROUTES.resetPassword} element={<ResetPasswordPage />} />
 
       {/* Logged-in app: sidebar + top bar layout */}
       <Route element={<ProtectedRoute />}>

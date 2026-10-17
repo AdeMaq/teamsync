@@ -42,6 +42,17 @@ export const refreshToken = asyncHandler(async (req, res) => {
   }
 });
 
+// Same response for every email, whether or not an account exists.
+export const forgotPassword = asyncHandler(async (req, res) => {
+  await authService.requestPasswordReset(req.body.email);
+  sendSuccess(res, { message: 'If an account exists for that email, a reset link has been sent.' });
+});
+
+export const resetPassword = asyncHandler(async (req, res) => {
+  await authService.resetPassword(req.body);
+  sendSuccess(res, null);
+});
+
 export const logout = asyncHandler(async (req, res) => {
   await authService.revokeRefreshToken(req.cookies?.[REFRESH_COOKIE]);
   res.clearCookie(REFRESH_COOKIE, cookieOptions);
