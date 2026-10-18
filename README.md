@@ -159,12 +159,13 @@ Indexes are defined in migrations, **not** in the Mongoose schemas, so there is 
 | Express app, error handling, validation, root router | Done |
 | Auth (register, login, refresh rotation, logout, forgot/reset password) | Done (email verification not yet) |
 | Profile (photo, name, email, password, delete account) | Done |
-| Automated tests (server) | 82 tests: auth, profile, password reset |
+| Workspaces API (create, members, invitations, roles, ownership transfer) | Done (backend only; the client screens are next) |
+| Automated tests (server) | 153 tests: auth, profile, password reset, workspaces and permissions |
 | Workspaces, projects, tasks, comments | Not started |
 | Real-time messaging, notifications, dashboard | Not started |
 | CI, client tests, Dockerfiles for the apps | Not started |
 
-Next up: workspaces (create, list, invite, roles) and the RBAC middleware.
+Next up: the workspace screens on the client, then projects and tasks.
 
 ## Troubleshooting
 
