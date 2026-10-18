@@ -25,7 +25,9 @@ export const errorHandler = (err, _req, res, _next) => {
       apiError = new ApiError(HTTP.BAD_REQUEST, ERROR_CODES.INVALID_JSON, 'Request body is not valid JSON');
     } else if (err.code === 11000) {
       // Duplicate key that slipped past an explicit check (e.g. a race between two requests).
-      apiError = new ApiError(HTTP.CONFLICT, ERROR_CODES.EMAIL_TAKEN, 'Resource already exists');
+      const field = Object.keys(err.keyPattern ?? {})[0];
+      const code = { email: ERROR_CODES.EMAIL_TAKEN, slug: ERROR_CODES.SLUG_TAKEN }[field] ?? ERROR_CODES.CONFLICT;
+      apiError = new ApiError(HTTP.CONFLICT, code, 'Resource already exists', field ? [{ field, message: 'Already in use' }] : undefined);
     } else {
       apiError = new ApiError(HTTP.INTERNAL_SERVER_ERROR, ERROR_CODES.INTERNAL_ERROR, 'Internal server error');
     }
