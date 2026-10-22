@@ -4,10 +4,12 @@ export const ROUTES = {
   register: '/register',
   forgotPassword: '/forgot-password',
   resetPassword: '/reset-password/:token',
+  invite: '/invites/:token',
   dashboard: '/dashboard',
   projects: '/projects',
   messages: '/messages',
   team: '/team',
   settings: '/settings',
   profile: '/profile',
+  newWorkspace: '/workspaces/new',
 };

@@ -124,3 +124,9 @@ export const LogoutIcon = make(
     <path d="m16 17 5-5-5-5M21 12H9" />
   </>
 );
+
+export const ChevronDownIcon = make(<path d="m6 9 6 6 6-6" />);
+
+export const PlusIcon = make(<path d="M12 5v14M5 12h14" />);
+
+export const CheckIcon = make(<path d="m5 12.5 4.5 4.5L19 7.5" />);

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import Input from '../../../shared/ui/Input';
 import Button from '../../../shared/ui/Button';
 import { parseApiError } from '../../../shared/api/errors';
@@ -12,6 +12,7 @@ export default function RegisterForm() {
   const [form, setForm] = useState({ name: '', email: '', password: '' });
   const [errors, setErrors] = useState({});
   const [register, { isLoading }] = useRegisterMutation();
+  const location = useLocation();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -86,7 +87,7 @@ export default function RegisterForm() {
 
       <p className="text-center text-xs mt-6 text-muted">
         Already have an account?{' '}
-        <Link to={ROUTES.login} className="font-semibold text-teal-400">
+        <Link to={ROUTES.login} state={location.state} className="font-semibold text-teal-400">
           Log in
         </Link>
       </p>
