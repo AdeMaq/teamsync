@@ -12,7 +12,8 @@ export default function LoginForm() {
   const [form, setForm] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
   const [login, { isLoading }] = useLoginMutation();
-  const notice = useLocation().state?.notice; // e.g. "Password updated" after a reset or change
+  const location = useLocation();
+  const notice = location.state?.notice; // e.g. "Password updated" after a reset or change
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -85,7 +86,7 @@ export default function LoginForm() {
 
       <p className="text-center text-xs mt-6 text-muted">
         Don't have an account?{' '}
-        <Link to={ROUTES.register} className="font-semibold text-teal-400">
+        <Link to={ROUTES.register} state={location.state} className="font-semibold text-teal-400">
           Sign up
         </Link>
       </p>

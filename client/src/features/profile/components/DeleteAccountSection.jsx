@@ -42,7 +42,8 @@ export default function DeleteAccountSection() {
     <section className="rounded-2xl border border-red-500/30 bg-red-500/5 p-5">
       <h2 className="font-display text-lg font-semibold text-red-300">Delete account</h2>
       <p className="mt-1 text-sm text-dash-muted">
-        Permanently deletes your account and signs you out everywhere. This cannot be undone.
+        Permanently deletes your account and signs you out everywhere. This cannot be undone. Workspaces you own pass
+        to their most senior member, and workspaces where you are the only member are deleted.
       </p>
 
       {!confirming ? (

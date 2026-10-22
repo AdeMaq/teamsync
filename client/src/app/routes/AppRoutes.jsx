@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useBootstrapAuth } from '../../features/auth';
+import { WorkspaceGate } from '../../features/workspaces';
 import GuestRoute from '../../shared/common/GuestRoute';
 import ProtectedRoute from '../../shared/common/ProtectedRoute';
 import AppShell from '../../shared/layout/AppShell';
@@ -8,7 +9,11 @@ import LoginPage from '../../pages/LoginPage';
 import RegisterPage from '../../pages/RegisterPage';
 import ForgotPasswordPage from '../../pages/ForgotPasswordPage';
 import ResetPasswordPage from '../../pages/ResetPasswordPage';
+import AcceptInvitePage from '../../pages/AcceptInvitePage';
 import DashboardPage from '../../pages/DashboardPage';
+import TeamPage from '../../pages/TeamPage';
+import WorkspaceSettingsPage from '../../pages/WorkspaceSettingsPage';
+import NewWorkspacePage from '../../pages/NewWorkspacePage';
 import ProfilePage from '../../pages/ProfilePage';
 import PlaceholderPage from '../../pages/PlaceholderPage';
 import { ROUTES } from './routePaths';
@@ -31,15 +36,24 @@ export default function AppRoutes() {
       <Route path={ROUTES.forgotPassword} element={<ForgotPasswordPage />} />
       <Route path={ROUTES.resetPassword} element={<ResetPasswordPage />} />
 
-      {/* Logged-in app: sidebar + top bar layout */}
+      {/* Logged-in only */}
       <Route element={<ProtectedRoute />}>
+        {/* Invitation link from an email: logged-out visitors log in first and come back here */}
+        <Route path={ROUTES.invite} element={<AcceptInvitePage />} />
+
+        {/* Sidebar + top bar layout */}
         <Route element={<AppShell />}>
-          <Route path={ROUTES.dashboard} element={<DashboardPage />} />
-          <Route path={ROUTES.projects} element={<PlaceholderPage title="Projects" />} />
-          <Route path={ROUTES.messages} element={<PlaceholderPage title="Messages" />} />
-          <Route path={ROUTES.team} element={<PlaceholderPage title="Team" />} />
-          <Route path={ROUTES.settings} element={<PlaceholderPage title="Settings" />} />
           <Route path={ROUTES.profile} element={<ProfilePage />} />
+          <Route path={ROUTES.newWorkspace} element={<NewWorkspacePage />} />
+
+          {/* Pages that need a workspace: WorkspaceGate asks for one to be created if there is none yet */}
+          <Route element={<WorkspaceGate />}>
+            <Route path={ROUTES.dashboard} element={<DashboardPage />} />
+            <Route path={ROUTES.projects} element={<PlaceholderPage title="Projects" />} />
+            <Route path={ROUTES.messages} element={<PlaceholderPage title="Messages" />} />
+            <Route path={ROUTES.team} element={<TeamPage />} />
+            <Route path={ROUTES.settings} element={<WorkspaceSettingsPage />} />
+          </Route>
         </Route>
       </Route>
 

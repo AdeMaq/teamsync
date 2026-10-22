@@ -210,6 +210,19 @@ Rules:
 - **Tests:** 71 new (153 total). `tests/unit/access.test.js` (permission table, slugify) and `tests/integration/workspaces.test.js` (create/list/get, update, delete, invitations incl. wrong-email and expiry, role changes, remove/leave, ownership transfer, account-deletion hand-over). A mutation check (weakening one permission) made the suite fail as expected.
 - **Not done:** the client (workspace switcher, create-workspace screen, members/invites screens, accepting an invite from the emailed link), workspace logo upload, plan limits, notifications for invites (the notifications module does not exist yet).
 
+### 2026-10-22 - Workspaces on the client: onboarding, switcher, team, settings, invitations
+- **Routes:** `/team` (members + invitations), `/settings` (workspace details + danger zone), `/workspaces/new`, and `/invites/:token` (logged-in only; logged-out visitors are sent to log in and brought back, and the login/register links now carry that "where you were headed" state so an invitee can sign up first). Pages that need a workspace sit under `WorkspaceGate`; profile, new-workspace and the invite page do not.
+- **Active workspace:** `features/workspaces` holds `activeWorkspaceId` (remembered in `localStorage`, per-viewer convenience, wrapped in try/catch). `useActiveWorkspace()` returns `{ workspaces, active, isLoading }`: the saved choice if still valid, otherwise the first workspace. **Projects, tasks, chat... read the current workspace through this hook** and send its `_id` to the API.
+- **`WorkspaceGate`:** spinner while loading, a retry card on error, and "Create your first workspace" when the user belongs to none (this is the registration -> first workspace step). Joining via an invitation or creating one makes it the active workspace.
+- **`WorkspaceSwitcher`** replaces the placeholder card in the sidebar (dropdown with the user's workspaces, check on the active one, "Create workspace" link, closes on outside click / Escape).
+- **Permissions on the client:** `features/workspaces/permissions.js` is a copy of the server's rank rules (`can`, `assignableRoles`, `canManageMember`), used **only to decide which buttons to show**. The server enforces everything again. **Change both together when a rule changes.**
+- **Team page:** invite form (admin+; role choices limited to roles below your own), members list (role select only where the rank rule allows, two-step "Remove"), pending invitations with revoke (admin+). Plain members see the list read-only.
+- **Settings page:** edit name/description (admin+; read-only for members; the URL name stays fixed). Danger zone: owner can transfer ownership or delete (must type the exact name); everyone else can leave.
+- **Cache:** RTK Query tags `Workspaces`, `Workspace(id)`, `Invites(id)`; deleting/leaving only refreshes the list (refetching a workspace you can no longer see would 404).
+- **Shared UI added:** `SelectField`, `TextAreaField`, `Spinner`, `ChevronDown/Plus/Check` icons, `formatDate`.
+- **Verified:** client builds and lints clean. The real app (routes, guards, store, API layer) was exercised with 14 UI tests against an in-memory fake API on a scratch copy (onboarding, switcher, role-dependent team/settings screens, invitations, delete confirmation); a mutation check on the permission helper made them fail as expected. **Not tried in a real browser, and not run against the real backend.** Those UI tests are NOT in the repository: the client has no test tooling yet (vitest + Testing Library would be added as dev dependencies).
+- **Still static:** the dashboard numbers, activity and workload (they need projects/tasks); the notification badge; `Projects` and `Messages` are placeholders.
+
 ### Known issues carried over
 - Client has both `tailwindcss@3` and `@tailwindcss/vite@4` installed; only v3 is used.
 - `/forgot-password` link on LoginPage has no route yet.

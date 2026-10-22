@@ -1,14 +1,12 @@
 import { Link, NavLink } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { selectCurrentUser } from '../../features/auth';
+import { WorkspaceSwitcher } from '../../features/workspaces';
 import { ROUTES } from '../../app/routes/routePaths';
 import { assetUrl } from '../utils/assetUrl';
 import Avatar from '../ui/Avatar';
 import { CloseIcon } from '../ui/icons';
 import { NAV_ITEMS } from './navItems';
-
-// PLACEHOLDER until workspaces exist in the backend: replace with the active workspace from the API.
-const WORKSPACE = { name: 'Northwind Labs', plan: 'Business · 24 seats' };
 
 const linkClass = ({ isActive }) =>
   `flex h-9 items-center gap-3 rounded-xl border px-3 text-sm font-medium transition-colors ${
@@ -48,11 +46,7 @@ export default function Sidebar({ open, onClose }) {
           </button>
         </div>
 
-        <div className="mb-6 rounded-2xl border border-dash-border bg-dash-card p-3">
-          <p className="text-xs text-dash-muted">Workspace</p>
-          <p className="mt-0.5 text-sm font-semibold text-dash-text">{WORKSPACE.name}</p>
-          <p className="mt-0.5 text-xs text-dash-teal">{WORKSPACE.plan}</p>
-        </div>
+        <WorkspaceSwitcher />
 
         <nav className="flex flex-col gap-1" aria-label="Main">
           {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
