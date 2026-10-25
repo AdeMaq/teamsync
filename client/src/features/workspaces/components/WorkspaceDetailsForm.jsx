@@ -72,7 +72,12 @@ export default function WorkspaceDetailsForm({ workspace }) {
           </div>
           <div>
             <dt className="text-xs text-dash-muted">Plan</dt>
-            <dd className="capitalize text-dash-text">{workspace.plan}</dd>
+            <dd className="text-dash-text">
+              <span className="capitalize">{workspace.plan}</span>
+              <span className="text-dash-muted">
+                {workspace.memberLimit ? ` · up to ${workspace.memberLimit} members` : ' · unlimited members'}
+              </span>
+            </dd>
           </div>
           <div>
             <dt className="text-xs text-dash-muted">Created</dt>

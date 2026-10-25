@@ -30,6 +30,16 @@ export const remove = asyncHandler(async (req, res) => {
   sendSuccess(res, null);
 });
 
+export const uploadLogo = asyncHandler(async (req, res) => {
+  const workspace = await workspacesService.setLogo(req.workspace, req.user.id, req.file);
+  sendSuccess(res, { workspace });
+});
+
+export const removeLogo = asyncHandler(async (req, res) => {
+  const workspace = await workspacesService.removeLogo(req.workspace, req.user.id);
+  sendSuccess(res, { workspace });
+});
+
 export const invite = asyncHandler(async (req, res) => {
   const created = await workspacesService.inviteMember(req.workspace, req.membership, req.body);
   sendSuccess(res, { invite: created }, HTTP.CREATED);

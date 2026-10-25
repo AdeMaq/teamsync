@@ -159,8 +159,8 @@ Indexes are defined in migrations, **not** in the Mongoose schemas, so there is 
 | Express app, error handling, validation, root router | Done |
 | Auth (register, login, refresh rotation, logout, forgot/reset password) | Done (email verification not yet) |
 | Profile (photo, name, email, password, delete account) | Done |
-| Workspaces (create, switch, members, invitations, roles, ownership transfer, settings) | Done, backend and client |
-| Automated tests (server) | 153 tests: auth, profile, password reset, workspaces and permissions |
+| Workspaces (create, switch, logo, members, invitations, roles, ownership transfer, settings, plan member limits) | Done, backend and client |
+| Automated tests (server) | 183 tests: auth, profile, password reset, workspaces, permissions, logo upload and plan limits |
 | Workspaces, projects, tasks, comments | Not started |
 | Real-time messaging, notifications, dashboard | Not started |
 | CI, client tests, Dockerfiles for the apps | Not started |

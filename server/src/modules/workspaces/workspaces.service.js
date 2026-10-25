@@ -4,10 +4,14 @@ import { ERROR_CODES } from '../../core/errors/errorTypes.js';
 import { HTTP } from '../../core/constants/httpStatusCodes.js';
 import { ROLES, ROLE_RANK } from '../../core/constants/roles.js';
 import { can } from '../../core/constants/permissions.js';
+import fs from 'fs/promises';
+import { PLAN_NAMES, memberLimitFor } from '../../core/constants/plans.js';
+import { looksLikeImage, removeUpload } from '../../core/utils/imageFile.js';
 import { slugify } from '../../core/utils/slugify.js';
 import { sendEmail } from '../../core/utils/sendEmail.js';
 import { hashToken } from '../../core/utils/generateToken.js';
 import { env } from '../../config/env.js';
+import { LOGO_URL_PREFIX, logosDir } from '../../config/paths.js';
 import logger from '../../config/logger.js';
 import { eventBus } from '../../events/eventBus.js';
 import { EVENTS } from '../../events/eventNames.js';
@@ -32,6 +36,18 @@ const forbidden = (message) => new ApiError(HTTP.FORBIDDEN, ERROR_CODES.FORBIDDE
 const invalidInvite = () =>
   new ApiError(HTTP.BAD_REQUEST, ERROR_CODES.INVALID_INVITE, 'This invitation is invalid or has expired');
 
+const planLimitReached = (workspace) => {
+  const limit = memberLimitFor(workspace.plan);
+  return new ApiError(
+    HTTP.FORBIDDEN,
+    ERROR_CODES.PLAN_LIMIT_REACHED,
+    `The ${PLAN_NAMES[workspace.plan] ?? 'current'} plan allows up to ${limit} members (including pending invitations). ` +
+      'Remove someone or revoke an invitation first.'
+  );
+};
+
+const removeLogoFile = (logoUrl) => removeUpload(logosDir, LOGO_URL_PREFIX, logoUrl);
+
 const toSummary = (workspace, userId) => ({
   _id: workspace.id,
   name: workspace.name,
@@ -39,6 +55,7 @@ const toSummary = (workspace, userId) => ({
   description: workspace.description,
   logo: workspace.logo,
   plan: workspace.plan,
+  memberLimit: memberLimitFor(workspace.plan), // null = unlimited
   owner: idOf(workspace.owner),
   memberCount: workspace.members.length,
   myRole: findMember(workspace, userId)?.role ?? null,
@@ -125,6 +142,42 @@ export const deleteWorkspace = async (workspace, { confirmName }) => {
   }
   await eventBus.emit(EVENTS.WORKSPACE_DELETED, { workspaceId: workspace.id });
   await workspacesRepository.deleteWorkspaceById(workspace.id);
+  await removeLogoFile(workspace.logo);
+};
+
+// ---- Logo ----
+
+// `file` is the multer result (already written to the logos folder).
+export const setLogo = async (workspace, userId, file) => {
+  if (!file) {
+    throw fieldError(HTTP.BAD_REQUEST, ERROR_CODES.VALIDATION_ERROR, 'logo', 'Choose an image to upload');
+  }
+
+  const discardUpload = () => fs.unlink(file.path).catch(() => {});
+
+  if (!(await looksLikeImage(file.path))) {
+    await discardUpload();
+    throw fieldError(HTTP.BAD_REQUEST, ERROR_CODES.VALIDATION_ERROR, 'logo', 'File is not a valid image');
+  }
+
+  const updated = await workspacesRepository.updateWorkspaceById(workspace.id, {
+    logo: `${LOGO_URL_PREFIX}${file.filename}`,
+  });
+  if (!updated) {
+    await discardUpload(); // the workspace disappeared while uploading
+    throw workspaceNotFound();
+  }
+
+  await removeLogoFile(workspace.logo); // the previous picture
+  return toSummary(updated, userId);
+};
+
+export const removeLogo = async (workspace, userId) => {
+  const updated = await workspacesRepository.updateWorkspaceById(workspace.id, { logo: '' });
+  if (!updated) throw workspaceNotFound();
+
+  await removeLogoFile(workspace.logo);
+  return toSummary(updated, userId);
 };
 
 // ---- Invitations ----
@@ -148,6 +201,11 @@ export const inviteMember = async (workspace, actor, { email, role }) => {
       ERROR_CODES.VALIDATION_ERROR,
       `Too many pending invitations (maximum ${MAX_PENDING_INVITES}). Revoke some first.`
     );
+  }
+
+  const limit = memberLimitFor(current.plan);
+  if (limit !== null && current.members.length + pendingForOthers >= limit) {
+    throw planLimitReached(current);
   }
 
   // Inviting the same email again replaces the old invitation, so only the newest link works.
@@ -219,8 +277,16 @@ export const acceptInvite = async (userId, token) => {
     return toSummary(workspace, userId);
   }
 
-  const result = await workspacesRepository.acceptInvite(workspace.id, invite.id, userId, invite.role);
-  if (result.modifiedCount === 0) throw invalidInvite(); // used up by a parallel request
+  const limit = memberLimitFor(workspace.plan);
+  if (limit !== null && workspace.members.length >= limit) throw planLimitReached(workspace); // invitation stays valid
+
+  const result = await workspacesRepository.acceptInvite(workspace.id, invite.id, userId, invite.role, limit);
+  if (result.modifiedCount === 0) {
+    // Either a parallel request used the invitation up, or the last seat was just taken.
+    const latest = await workspacesRepository.findWorkspaceById(workspace.id);
+    if (latest && limit !== null && latest.members.length >= limit) throw planLimitReached(latest);
+    throw invalidInvite();
+  }
 
   return toSummary(await workspacesRepository.findWorkspaceById(workspace.id), userId);
 };
@@ -297,6 +363,7 @@ export const handleUserDeleted = async (userId) => {
     } else {
       await eventBus.emit(EVENTS.WORKSPACE_DELETED, { workspaceId: workspace.id });
       await workspacesRepository.deleteWorkspaceById(workspace.id);
+      await removeLogoFile(workspace.logo);
     }
   }
 

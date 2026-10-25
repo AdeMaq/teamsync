@@ -9,7 +9,7 @@ export default function TeamPage() {
   return (
     <div key={active._id} className="max-w-3xl space-y-4">
       {canInvite && <InviteForm workspaceId={active._id} myRole={active.myRole} />}
-      <MembersCard workspaceId={active._id} myRole={active.myRole} />
+      <MembersCard workspaceId={active._id} myRole={active.myRole} memberLimit={active.memberLimit} />
       {canInvite && <PendingInvites workspaceId={active._id} />}
     </div>
   );

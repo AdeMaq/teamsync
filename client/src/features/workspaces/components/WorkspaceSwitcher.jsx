@@ -5,6 +5,7 @@ import { ROUTES } from '../../../app/routes/routePaths';
 import { CheckIcon, ChevronDownIcon, PlusIcon } from '../../../shared/ui/icons';
 import { useActiveWorkspace } from '../hooks/useActiveWorkspace';
 import { selectWorkspace } from '../slice';
+import WorkspaceLogo from './WorkspaceLogo';
 
 const planLabel = (plan) => plan.charAt(0).toUpperCase() + plan.slice(1);
 const membersLabel = (count) => `${count} ${count === 1 ? 'member' : 'members'}`;
@@ -46,6 +47,7 @@ export default function WorkspaceSwitcher() {
         className="flex w-full items-center gap-2 rounded-2xl border border-dash-border bg-dash-card p-3 text-left
           transition-colors hover:border-[#2F3A5C]"
       >
+        {active && <WorkspaceLogo workspace={active} />}
         <span className="min-w-0 flex-1">
           <span className="block text-xs text-dash-muted">Workspace</span>
           {active ? (
@@ -73,6 +75,7 @@ export default function WorkspaceSwitcher() {
                   className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm text-dash-text
                     transition-colors hover:bg-white/5"
                 >
+                  <WorkspaceLogo workspace={workspace} className="!h-6 !w-6 !rounded-lg !text-xs" />
                   <span className="min-w-0 flex-1 truncate">{workspace.name}</span>
                   {workspace._id === active?._id && <CheckIcon size={16} className="shrink-0 text-dash-teal" />}
                 </button>

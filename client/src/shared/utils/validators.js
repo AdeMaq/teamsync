@@ -24,3 +24,13 @@ export function validateNewPassword(password, confirm) {
   if (confirm !== password) errors.confirm = 'Passwords do not match';
   return errors;
 }
+
+const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+const MAX_IMAGE_BYTES = 2 * 1024 * 1024; // same limit as the server
+
+// Returns a message when the file is not an acceptable picture, otherwise ''. The server checks again.
+export function validateImageFile(file) {
+  if (!IMAGE_TYPES.includes(file.type)) return 'Use a JPEG, PNG or WebP image.';
+  if (file.size > MAX_IMAGE_BYTES) return 'Image must be 2 MB or smaller.';
+  return '';
+}

@@ -10,4 +10,6 @@ export { default as InviteForm } from './components/InviteForm';
 export { default as MembersCard } from './components/MembersCard';
 export { default as PendingInvites } from './components/PendingInvites';
 export { default as WorkspaceDetailsForm } from './components/WorkspaceDetailsForm';
+export { default as LogoSection } from './components/LogoSection';
+export { default as WorkspaceLogo } from './components/WorkspaceLogo';
 export { default as DangerZone } from './components/DangerZone';

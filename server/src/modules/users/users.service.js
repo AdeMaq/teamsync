@@ -1,9 +1,9 @@
 import fs from 'fs/promises';
-import path from 'path';
 import ApiError from '../../core/errors/ApiError.js';
 import { ERROR_CODES } from '../../core/errors/errorTypes.js';
 import { HTTP } from '../../core/constants/httpStatusCodes.js';
 import { hashPassword, verifyPassword } from '../../core/utils/password.js';
+import { looksLikeImage, removeUpload } from '../../core/utils/imageFile.js';
 import { AVATAR_URL_PREFIX, avatarsDir } from '../../config/paths.js';
 import { eventBus } from '../../events/eventBus.js';
 import { EVENTS } from '../../events/eventNames.js';
@@ -45,25 +45,7 @@ const assertPassword = async (user, password, field = 'password') => {
   }
 };
 
-// Deletes a stored avatar file. Only files inside the avatars folder are ever touched.
-const removeAvatarFile = async (avatarUrl) => {
-  if (!avatarUrl?.startsWith(AVATAR_URL_PREFIX)) return;
-  await fs.unlink(path.join(avatarsDir, path.basename(avatarUrl))).catch(() => {});
-};
-
-// The client-supplied mime type can be faked, so check the file's real signature too.
-const isRealImage = async (filePath) => {
-  const handle = await fs.open(filePath, 'r');
-  try {
-    const { buffer } = await handle.read(Buffer.alloc(12), 0, 12, 0);
-    const isJpeg = buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff;
-    const isPng = buffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
-    const isWebp = buffer.toString('ascii', 0, 4) === 'RIFF' && buffer.toString('ascii', 8, 12) === 'WEBP';
-    return isJpeg || isPng || isWebp;
-  } finally {
-    await handle.close();
-  }
-};
+const removeAvatarFile = (avatarUrl) => removeUpload(avatarsDir, AVATAR_URL_PREFIX, avatarUrl);
 
 export const getUserProfile = async (id) => {
   const user = await usersRepository.findUserById(id);
@@ -122,7 +104,7 @@ export const setAvatar = async (userId, file) => {
 
   const discardUpload = () => fs.unlink(file.path).catch(() => {});
 
-  if (!(await isRealImage(file.path))) {
+  if (!(await looksLikeImage(file.path))) {
     await discardUpload();
     throw fieldError(HTTP.BAD_REQUEST, ERROR_CODES.VALIDATION_ERROR, 'avatar', 'File is not a valid image');
   }
