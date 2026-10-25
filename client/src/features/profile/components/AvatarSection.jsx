@@ -5,11 +5,9 @@ import ActionButton from '../../../shared/ui/ActionButton';
 import Card from '../../../shared/ui/Card';
 import { parseApiError } from '../../../shared/api/errors';
 import { assetUrl } from '../../../shared/utils/assetUrl';
+import { validateImageFile } from '../../../shared/utils/validators';
 import { selectCurrentUser } from '../../auth';
 import { useRemoveAvatarMutation, useUploadAvatarMutation } from '../api/profileApi';
-
-const MAX_BYTES = 2 * 1024 * 1024; // same limit as the server
-const TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 export default function AvatarSection() {
   const user = useSelector(selectCurrentUser);
@@ -24,8 +22,8 @@ export default function AvatarSection() {
     if (!file) return;
 
     setError('');
-    if (!TYPES.includes(file.type)) return setError('Use a JPEG, PNG or WebP image.');
-    if (file.size > MAX_BYTES) return setError('Image must be 2 MB or smaller.');
+    const problem = validateImageFile(file);
+    if (problem) return setError(problem);
 
     try {
       await upload(file).unwrap();

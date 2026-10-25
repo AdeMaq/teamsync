@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { requireAuth } from '../../core/middleware/auth.middleware.js';
 import { validate } from '../../core/middleware/validate.middleware.js';
 import { authLimiter } from '../../core/middleware/rateLimiter.middleware.js';
+import { uploadLogo } from '../../core/middleware/upload.middleware.js';
 import { requireWorkspacePermission as allow } from './workspaces.middleware.js';
 import {
   acceptInviteSchema,
@@ -33,6 +34,10 @@ router.get('/:id', validate(idParams), allow('workspace:view'), workspacesContro
 router.patch('/:id', validate(updateWorkspaceSchema), allow('workspace:update'), workspacesController.update);
 router.delete('/:id', validate(deleteWorkspaceSchema), allow('workspace:delete'), workspacesController.remove);
 router.post('/:id/transfer-ownership', validate(transferSchema), allow('workspace:transfer'), workspacesController.transferOwnership);
+
+// Logo: the permission check runs BEFORE the upload, so nobody who may not change it can write a file
+router.post('/:id/logo', validate(idParams), allow('workspace:update'), uploadLogo, workspacesController.uploadLogo);
+router.delete('/:id/logo', validate(idParams), allow('workspace:update'), workspacesController.removeLogo);
 
 // Invitations
 router.post('/:id/invite', validate(inviteSchema), allow('members:invite'), workspacesController.invite);

@@ -46,6 +46,20 @@ export const workspaceApi = baseApi.injectEndpoints({
       invalidatesTags: ['Workspaces'],
     }),
 
+    uploadLogo: build.mutation({
+      query: ({ id, file }) => {
+        const body = new FormData();
+        body.append('logo', file); // the browser sets the multipart Content-Type itself
+        return { url: `/workspaces/${id}/logo`, method: 'POST', body };
+      },
+      invalidatesTags: (_result, _error, { id }) => ['Workspaces', { type: 'Workspace', id }],
+    }),
+
+    removeLogo: build.mutation({
+      query: (id) => ({ url: `/workspaces/${id}/logo`, method: 'DELETE' }),
+      invalidatesTags: (_result, _error, id) => ['Workspaces', { type: 'Workspace', id }],
+    }),
+
     transferOwnership: build.mutation({
       query: ({ id, userId }) => ({ url: `/workspaces/${id}/transfer-ownership`, method: 'POST', body: { userId } }),
       invalidatesTags: (_result, _error, { id }) => ['Workspaces', { type: 'Workspace', id }],
@@ -101,6 +115,8 @@ export const {
   useCreateWorkspaceMutation,
   useUpdateWorkspaceMutation,
   useDeleteWorkspaceMutation,
+  useUploadLogoMutation,
+  useRemoveLogoMutation,
   useTransferOwnershipMutation,
   useChangeMemberRoleMutation,
   useRemoveMemberMutation,

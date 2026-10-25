@@ -39,11 +39,16 @@ export const removeInviteById = (id, inviteId) => Workspace.updateOne({ _id: id 
 
 export const findWorkspaceByInviteHash = (tokenHash) => Workspace.findOne({ 'invites.tokenHash': tokenHash });
 
-// Atomic: only changes anything if the invitation still exists and the user is not a member yet,
-// so two simultaneous clicks cannot add the same person twice.
-export const acceptInvite = (id, inviteId, userId, role) =>
+// Atomic: only changes anything if the invitation still exists, the user is not a member yet and (when the plan
+// has a member limit) there is still room, so simultaneous clicks cannot add the same person twice or overfill it.
+export const acceptInvite = (id, inviteId, userId, role, memberLimit = null) =>
   Workspace.updateOne(
-    { _id: id, 'invites._id': inviteId, 'members.user': { $ne: userId } },
+    {
+      _id: id,
+      'invites._id': inviteId,
+      'members.user': { $ne: userId },
+      ...(memberLimit !== null && { $expr: { $lt: [{ $size: '$members' }, memberLimit] } }),
+    },
     { $push: { members: { user: userId, role, joinedAt: new Date() } }, $pull: { invites: { _id: inviteId } } }
   );
 

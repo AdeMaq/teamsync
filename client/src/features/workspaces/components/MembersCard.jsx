@@ -86,7 +86,7 @@ function MemberRow({ workspaceId, member, myRole, myId, onError }) {
   );
 }
 
-export default function MembersCard({ workspaceId, myRole }) {
+export default function MembersCard({ workspaceId, myRole, memberLimit = null }) {
   const me = useSelector(selectCurrentUser);
   const { data: workspace, isLoading, isError } = useGetWorkspaceQuery(workspaceId);
   const [error, setError] = useState('');
@@ -94,7 +94,12 @@ export default function MembersCard({ workspaceId, myRole }) {
   return (
     <Card className="p-5">
       <h2 className="font-display text-lg font-semibold text-dash-text">
-        Members {workspace && <span className="text-sm font-normal text-dash-muted">({workspace.members.length})</span>}
+        Members{' '}
+        {workspace && (
+          <span className="text-sm font-normal text-dash-muted">
+            ({memberLimit ? `${workspace.members.length} of ${memberLimit}` : workspace.members.length})
+          </span>
+        )}
       </h2>
 
       {isLoading && <Spinner />}
