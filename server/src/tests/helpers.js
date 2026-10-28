@@ -66,3 +66,17 @@ export async function addMember(workspaceId, inviterToken, role = 'member') {
 
   return { ...account, inviteToken };
 }
+
+// ---- projects ----
+
+// Creates a project through the real endpoint; returns the project.
+export async function createProject(token, workspaceId, body = {}) {
+  const res = await http()
+    .post(`${BASE}/workspaces/${workspaceId}/projects`)
+    .set(authed(token))
+    .send({ name: 'Apollo Web App', ...body });
+  if (res.status !== 201) {
+    throw new Error(`createProject failed: ${res.status} ${JSON.stringify(res.body)}`);
+  }
+  return res.body.data.project;
+}

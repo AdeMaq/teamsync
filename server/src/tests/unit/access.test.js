@@ -21,6 +21,11 @@ describe('permissions', () => {
     ['admin', 'workspace:transfer', false],
     ['owner', 'workspace:delete', true],
     ['owner', 'workspace:transfer', true],
+    ['member', 'project:view', true],
+    ['member', 'project:create', true],
+    ['member', 'project:manage', false], // members can only manage projects they lead (projects module)
+    ['admin', 'project:manage', true],
+    ['owner', 'project:manage', true],
   ])('%s %s -> %s', (role, action, expected) => {
     expect(can(role, action)).toBe(expected);
   });
