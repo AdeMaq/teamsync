@@ -83,6 +83,14 @@ const toInvite = (invite) => ({
 
 export const findWorkspace = (id) => workspacesRepository.findWorkspaceById(id);
 
+// For other modules (through workspaces/index.js): is this person in this workspace, and with which role?
+// Resolves to { workspace, membership } or null. Non-members and unknown workspaces are indistinguishable on purpose.
+export const getMembership = async (workspaceId, userId) => {
+  const workspace = await workspacesRepository.findWorkspaceById(workspaceId);
+  const membership = workspace && findMember(workspace, userId);
+  return membership ? { workspace, membership } : null;
+};
+
 // ---- Workspaces ----
 
 const requireFreeSlug = async (slug) => {
@@ -333,6 +341,7 @@ export const removeMember = async (workspace, actor, targetUserId) => {
   }
 
   await workspacesRepository.removeMember(workspace.id, targetUserId);
+  await eventBus.emit(EVENTS.WORKSPACE_MEMBER_REMOVED, { workspaceId: workspace.id, userId: idOf(targetUserId) });
 };
 
 export const transferOwnership = async (workspace, actor, newOwnerId) => {

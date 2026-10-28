@@ -10,6 +10,10 @@ export const PERMISSIONS = Object.freeze({
   'workspace:transfer': ROLES.OWNER,
   'members:invite': ROLES.ADMIN,
   'members:manage': ROLES.ADMIN,
+  'project:view': ROLES.MEMBER,
+  'project:create': ROLES.MEMBER,
+  // Edit/delete any project. Without this role, only that project's lead may (see projects.middleware.js).
+  'project:manage': ROLES.ADMIN,
 });
 
 export const can = (role, action) => {

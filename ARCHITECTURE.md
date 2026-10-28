@@ -233,6 +233,21 @@ Rules:
 - **Tests:** server 183 (30 new: `workspaceLogo`, `planLimits`, `plans` unit). Client: 11 UI tests on a fake API in a scratch copy (not in the repo, see the previous entry), including a mutation check.
 - **Still not done:** invitation notifications (the notifications module does not exist yet; a `workspace.member_invited` event can be added when it does), and a real-browser pass.
 
+### 2026-10-28 - Projects module (backend)
+- **Endpoints:** `POST /api/v1/workspaces/:workspaceId/projects` (create), `GET /api/v1/workspaces/:workspaceId/projects` (list), `GET|PATCH|DELETE /api/v1/projects/:id`.
+- **Who can do what (defaults chosen by the developer, change them in `permissions.js` / `projects.service.js`):** every workspace member can see all projects of the workspace and create one, and becomes its **lead**. Editing or deleting needs the project's lead **or** a workspace admin/owner. Private projects with their own member lists are NOT built (the model's `contributor`/`viewer` roles are unused for now).
+- **Permissions:** `core/constants/permissions.js` gained `project:view`, `project:create` (member) and `project:manage` (admin: the workspace-wide override). The extra "or the lead" rule lives in `projects.service.js` (`canOnProject`).
+- **Two guards:** workspace-scoped routes reuse `requireWorkspacePermission(action, 'workspaceId')`. Routes that name only a project use the new `requireProjectPermission(action)` (projects module): it loads the project, looks up the caller's role in the project's workspace through `workspaces/index.js` (`getMembership`), and answers non-members with the same 404 as a missing project. **Tasks, comments... must use `requireProjectPermission` on their `/projects/:id/...` routes.**
+- **List:** always limited to one workspace; filters `status`, `q` (name search, case-insensitive, matched literally via `escapeRegex`), `sort` (`updated` default, `name`, `created`, with `_id` as tie-breaker), paging `page` (>=1) and `limit` (1-100, default 20); response `{ projects, total, page, limit }`. Query values are validated into `req.valid.query` (Express 5 keeps `req.query` read-only).
+- **Response shape:** each project has `lead` (name/email/avatar, or `null` when nobody leads it), `createdBy` (id only), `canManage` (computed for the caller, to show or hide buttons; the server still checks) and the usual fields.
+- **Dates:** an end date before the start date is rejected (400, field `endDate`), also when only one of them is updated; `null` clears a date.
+- **Lead:** `PATCH` with `leadId` hands the project over (the new lead must be a workspace member); an atomic pipeline update keeps exactly one lead.
+- **Events (new in `events/eventNames.js`):** `WORKSPACE_MEMBER_REMOVED` (emitted by workspaces when someone is removed or leaves) and `PROJECT_DELETED` (emitted before a project is deleted; **tasks and comments must listen and delete their own data**). Projects listens for `WORKSPACE_DELETED` (deletes the workspace's projects), `USER_DELETED` and `WORKSPACE_MEMBER_REMOVED` (the person stops being a lead; the project stays and admins can still manage it and name a new lead).
+- **Migration added:** `20261028100001-add-project-indexes` (`workspace + updatedAt desc`, `members.user`). Run `npm run migrate:up` on the development database.
+- **Rate limiter:** `authLimiter` is now `{ production: 20, development: 200, test: 100000 }` (an unknown environment name gets the strict limit); the test suite creates hundreds of accounts from one address.
+- **Tests:** 46 new (229 total): `tests/integration/projects.test.js` (create, list incl. filters/search/paging/tenant isolation, get, update incl. dates and lead hand-over, delete, event clean-ups) and project rows in the permission-table unit test. Two mutation checks (everyone can manage; list ignores the workspace) made the suite fail as expected.
+- **Not done:** the client (Projects page, project form, project page), task counts per project (needs the tasks module), project-level members.
+
 ### Known issues carried over
 - Client has both `tailwindcss@3` and `@tailwindcss/vite@4` installed; only v3 is used.
 - `/forgot-password` link on LoginPage has no route yet.
