@@ -11,6 +11,9 @@ import ForgotPasswordPage from '../../pages/ForgotPasswordPage';
 import ResetPasswordPage from '../../pages/ResetPasswordPage';
 import AcceptInvitePage from '../../pages/AcceptInvitePage';
 import DashboardPage from '../../pages/DashboardPage';
+import ProjectsPage from '../../pages/ProjectsPage';
+import NewProjectPage from '../../pages/NewProjectPage';
+import ProjectPage from '../../pages/ProjectPage';
 import TeamPage from '../../pages/TeamPage';
 import WorkspaceSettingsPage from '../../pages/WorkspaceSettingsPage';
 import NewWorkspacePage from '../../pages/NewWorkspacePage';
@@ -49,7 +52,9 @@ export default function AppRoutes() {
           {/* Pages that need a workspace: WorkspaceGate asks for one to be created if there is none yet */}
           <Route element={<WorkspaceGate />}>
             <Route path={ROUTES.dashboard} element={<DashboardPage />} />
-            <Route path={ROUTES.projects} element={<PlaceholderPage title="Projects" />} />
+            <Route path={ROUTES.projects} element={<ProjectsPage />} />
+            <Route path={ROUTES.newProject} element={<NewProjectPage />} />
+            <Route path={ROUTES.project} element={<ProjectPage />} />
             <Route path={ROUTES.messages} element={<PlaceholderPage title="Messages" />} />
             <Route path={ROUTES.team} element={<TeamPage />} />
             <Route path={ROUTES.settings} element={<WorkspaceSettingsPage />} />

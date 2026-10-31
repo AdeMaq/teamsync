@@ -160,13 +160,13 @@ Indexes are defined in migrations, **not** in the Mongoose schemas, so there is 
 | Auth (register, login, refresh rotation, logout, forgot/reset password) | Done (email verification not yet) |
 | Profile (photo, name, email, password, delete account) | Done |
 | Workspaces (create, switch, logo, members, invitations, roles, ownership transfer, settings, plan member limits) | Done, backend and client |
-| Projects API (create, list with filters and paging, edit, delete, lead hand-over) | Done (backend only; the client screens are next) |
+| Projects (create, list with search, filters and paging, edit, delete, lead hand-over) | Done, backend and client |
 | Automated tests (server) | 229 tests: auth, profile, password reset, workspaces, permissions, logo upload, plan limits and projects |
 | Workspaces, projects, tasks, comments | Not started |
 | Real-time messaging, notifications, dashboard | Not started |
 | CI, client tests, Dockerfiles for the apps | Not started |
 
-Next up: the Projects screens on the client, then tasks and the Kanban board.
+Next up: tasks and the Kanban board.
 
 ## Troubleshooting
 

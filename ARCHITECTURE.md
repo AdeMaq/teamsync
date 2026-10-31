@@ -248,6 +248,16 @@ Rules:
 - **Tests:** 46 new (229 total): `tests/integration/projects.test.js` (create, list incl. filters/search/paging/tenant isolation, get, update incl. dates and lead hand-over, delete, event clean-ups) and project rows in the permission-table unit test. Two mutation checks (everyone can manage; list ignores the workspace) made the suite fail as expected.
 - **Not done:** the client (Projects page, project form, project page), task counts per project (needs the tasks module), project-level members.
 
+### 2026-10-31 - Projects screens (client)
+- **Routes:** `/projects` (list), `/projects/new` (create), `/projects/:projectId` (details). All sit inside `WorkspaceGate`, so a workspace always exists. `ROUTES.project` is a pattern; `projectPath(id)` builds the link.
+- **Feature folder `client/src/features/projects`:** `api/projectApi.js` (RTK Query), `components/` (`ProjectsList`, `ProjectCard`, `ProjectForm`, `DeleteProject`, `StatusBadge`), `constants.js` (statuses, sorts, colours; the statuses must match `PROJECT_STATUSES` on the server), `utils.js` (paths and date formatting), `index.js` (the public API). Pages: `ProjectsPage`, `NewProjectPage`, `ProjectPage`.
+- **Cache tags:** `Projects` (one list per workspace, `id` = workspace id) and `Project` (one project). Create and edit refresh the workspace's list; edit also refreshes the project; delete refreshes only the list, because refetching the deleted project would return 404.
+- **List:** search (debounced 300 ms by the new `shared/hooks/useDebounce`), status filter and sort are sent to the server; 12 per page with Previous/Next. A filter change returns to page 1; if the last page empties, the list steps back one page. Search is labelled "Search projects" because the top bar already has a "Search" box.
+- **Permissions in the UI:** the Edit and Delete sections show only when the server's `canManage` flag is true; the server checks every request again. `permissions.js` on the client needed no change.
+- **Form:** one `ProjectForm` for create and edit. Edit mode adds the lead hand-over (members come from the workspace query), and "Save changes" stays disabled until something changed. Empty dates are sent as `null`. Project dates are calendar days and are shown in UTC so a time zone cannot shift them.
+- **Tests:** the repo still has no client test setup. The 15 new screen tests (list, filters, paging, tenant isolation, create, validation, edit, lead hand-over, read-only member, lead-as-member, delete with confirmation, not found) ran in a scratch copy of the client on a fake in-memory API, together with the 11 earlier workspace tests: 26 pass. Three weakened behaviours (always show Edit, always enable Save, ignore the page number) each failed tests as expected.
+- **Not done:** task counts and progress on the cards (need the tasks module), the Tasks section on the project page (placeholder), a real-browser pass.
+
 ### Known issues carried over
 - Client has both `tailwindcss@3` and `@tailwindcss/vite@4` installed; only v3 is used.
 - `/forgot-password` link on LoginPage has no route yet.

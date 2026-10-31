@@ -7,6 +7,8 @@ export const ROUTES = {
   invite: '/invites/:token',
   dashboard: '/dashboard',
   projects: '/projects',
+  newProject: '/projects/new',
+  project: '/projects/:projectId',
   messages: '/messages',
   team: '/team',
   settings: '/settings',
