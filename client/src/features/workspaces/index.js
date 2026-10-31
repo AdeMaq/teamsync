@@ -1,6 +1,7 @@
 // Public API of the workspaces feature. Other code imports only from here.
 export { default as workspacesReducer, selectWorkspace } from './slice';
 export { useActiveWorkspace } from './hooks/useActiveWorkspace';
+export { useGetWorkspaceQuery } from './api/workspaceApi';
 export { can, assignableRoles, ROLE_LABELS } from './permissions';
 export { default as WorkspaceGate } from './components/WorkspaceGate';
 export { default as WorkspaceSwitcher } from './components/WorkspaceSwitcher';

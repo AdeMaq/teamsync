@@ -5,6 +5,6 @@ import { baseQueryWithReauth } from './baseQuery';
 export const baseApi = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithReauth,
-  tagTypes: ['Workspaces', 'Workspace', 'Invites'], // cache tags: mutations invalidate the lists/details they change
+  tagTypes: ['Workspaces', 'Workspace', 'Invites', 'Projects', 'Project'], // cache tags: mutations invalidate the lists/details they change
   endpoints: () => ({}),
 });
