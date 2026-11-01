@@ -26,6 +26,12 @@ describe('permissions', () => {
     ['member', 'project:manage', false], // members can only manage projects they lead (projects module)
     ['admin', 'project:manage', true],
     ['owner', 'project:manage', true],
+    ['member', 'task:view', true],
+    ['member', 'task:create', true],
+    ['member', 'task:update', true],
+    ['member', 'task:delete', false], // members can only delete tasks they created, or in projects they lead (tasks module)
+    ['admin', 'task:delete', true],
+    ['owner', 'task:delete', true],
   ])('%s %s -> %s', (role, action, expected) => {
     expect(can(role, action)).toBe(expected);
   });
