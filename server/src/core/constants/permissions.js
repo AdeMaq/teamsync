@@ -14,6 +14,12 @@ export const PERMISSIONS = Object.freeze({
   'project:create': ROLES.MEMBER,
   // Edit/delete any project. Without this role, only that project's lead may (see projects.middleware.js).
   'project:manage': ROLES.ADMIN,
+  // Everyone in the workspace can see, create, edit and move tasks (like a shared board).
+  'task:view': ROLES.MEMBER,
+  'task:create': ROLES.MEMBER,
+  'task:update': ROLES.MEMBER,
+  // Delete any task. Without this role, only the task's creator or its project's lead may (see tasks.service.js).
+  'task:delete': ROLES.ADMIN,
 });
 
 export const can = (role, action) => {

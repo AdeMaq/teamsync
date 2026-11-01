@@ -2,7 +2,7 @@
 
 Remote team workspace SaaS. A company signs up, creates a workspace, invites its people, and organizes projects, tracks tasks on a Kanban board, chats in real time, and follows progress on a dashboard. It is built to mirror how a real product (Jira / Trello / Slack) is engineered: clean architecture, secure auth, sensible API design.
 
-> **Status: early development.** The database layer, authentication (register, login, session refresh, logout) and the Login/Register UI are in place. Workspaces, projects, tasks, chat and the rest are not built yet. See [Project status](#project-status).
+> **Status: early development.** The database layer, authentication (register, login, session refresh, logout) and the Login/Register UI are in place. Workspaces, projects and the tasks API are built; the Kanban screens, comments, chat and the rest are not yet. See [Project status](#project-status).
 
 ## Tech stack
 
@@ -161,12 +161,13 @@ Indexes are defined in migrations, **not** in the Mongoose schemas, so there is 
 | Profile (photo, name, email, password, delete account) | Done |
 | Workspaces (create, switch, logo, members, invitations, roles, ownership transfer, settings, plan member limits) | Done, backend and client |
 | Projects (create, list with search, filters and paging, edit, delete, lead hand-over) | Done, backend and client |
-| Automated tests (server) | 229 tests: auth, profile, password reset, workspaces, permissions, logo upload, plan limits and projects |
-| Workspaces, projects, tasks, comments | Not started |
+| Tasks API (create, list with filters, edit, move and reorder across Kanban columns, delete) | Done (backend only; the board screens are next) |
+| Automated tests (server) | 270 tests: auth, profile, password reset, workspaces, permissions, logo upload, plan limits, projects and tasks |
+| Comments | Not started |
 | Real-time messaging, notifications, dashboard | Not started |
 | CI, client tests, Dockerfiles for the apps | Not started |
 
-Next up: tasks and the Kanban board.
+Next up: the Kanban board on the client.
 
 ## Troubleshooting
 
