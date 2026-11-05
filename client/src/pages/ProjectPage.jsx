@@ -1,4 +1,5 @@
 import { Link, useParams } from 'react-router-dom';
+import { KanbanBoard } from '../features/tasks';
 import { DeleteProject, ProjectForm, StatusBadge, formatDateRange, useGetProjectQuery } from '../features/projects';
 import ActionButton from '../shared/ui/ActionButton';
 import Avatar from '../shared/ui/Avatar';
@@ -47,12 +48,12 @@ export default function ProjectPage() {
   const { lead } = project;
 
   return (
-    <div className="max-w-3xl space-y-4">
+    <div className="space-y-4">
       <Link to={ROUTES.projects} className="text-sm text-dash-muted hover:text-dash-text">
         ← Back to projects
       </Link>
 
-      <Card className="p-5">
+      <Card className="max-w-3xl p-5">
         <div className="flex flex-wrap items-center gap-3">
           <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: project.color }} aria-hidden="true" />
           <h2 className="min-w-0 flex-1 break-words font-display text-xl font-semibold text-dash-text">{project.name}</h2>
@@ -84,7 +85,7 @@ export default function ProjectPage() {
 
       {project.canManage && (
         <>
-          <Card className="p-5">
+          <Card className="max-w-3xl p-5">
             <h2 className="font-display text-lg font-semibold text-dash-text">Edit project</h2>
             <div className="mt-4">
               <ProjectForm key={project._id} workspaceId={project.workspace} project={project} />
@@ -94,10 +95,10 @@ export default function ProjectPage() {
         </>
       )}
 
-      <Card className="p-5">
+      <section aria-label="Tasks" className="space-y-3 pt-2">
         <h2 className="font-display text-lg font-semibold text-dash-text">Tasks</h2>
-        <p className="mt-1 text-sm text-dash-muted">The task board for this project is coming soon.</p>
-      </Card>
+        <KanbanBoard project={project} />
+      </section>
     </div>
   );
 }
