@@ -272,6 +272,13 @@ Rules:
 - **Tests:** 41 new (270 total): `tests/integration/tasks.test.js` (create, list and filters, get, update, move incl. ordering and renumbering, delete rules, tenant isolation, event clean-ups, the per-project limit) and task rows in the permission-table unit test. Six mutation checks (anyone can delete; list ignores the project; move ignores the index; assignee need not be a member; project delete keeps tasks; membership lookup removed) each made the suite fail as expected.
 - **Not done:** the board on the client, task counts on project cards, comments, attachments and labels, several assignees.
 
+### 2026-11-05 - Kanban board (client)
+- **Where:** `client/src/features/tasks` (`api/taskApi.js`, `components/{KanbanBoard,TaskCard,TaskModal}.jsx`, `constants.js`, `utils.js`), mounted in `ProjectPage` in place of the "coming soon" card. New cache tag `Tasks` (one per project).
+- **Drag and drop:** native HTML5 drag events, no new dependency. Dropping on a card places the dragged card before it; dropping on empty column space puts it at the bottom. The `index` sent to `POST /tasks/:id/move` is counted over ALL cards of the column without the moved one, so the filters never change the order.
+- **Optimistic move:** `moveTask` patches the cached list (same neighbour-average rule as the server) and undoes it if the request fails; it refetches afterwards because the server may renumber a column.
+- **Filters** (priority, assignee incl. "Unassigned") run on the client over the full list the API returns. Create/edit/delete in `TaskModal`; the Delete button follows the server's `canDelete`. A task's column changes only by dragging.
+- **Not done:** keyboard-only moving of cards (cards open with Enter, but moving needs a mouse or touch drag-and-drop support), touch drag on mobile, client tests, comments.
+
 ### Known issues carried over
 - Client has both `tailwindcss@3` and `@tailwindcss/vite@4` installed; only v3 is used.
 - `/forgot-password` link on LoginPage has no route yet.
