@@ -53,3 +53,5 @@ export const listTasksSchema = {
     assignee: Joi.alternatives(Joi.string().valid('me', 'none'), objectIdField).label('Assignee'),
   }),
 };
+
+export const workspaceCountsSchema = { params: Joi.object({ workspaceId: objectIdField.required() }) };

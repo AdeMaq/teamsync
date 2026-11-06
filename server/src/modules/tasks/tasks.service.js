@@ -99,6 +99,19 @@ export const listTasks = async (project, ctx, { status, priority, assignee }) =>
   return { tasks: tasks.map((task) => toTask(task, ctx)) };
 };
 
+// { [projectId]: { todo, 'in-progress', 'in-review', 'done', total } } for every project that has tasks;
+// projects without tasks are left out (the screen treats a missing entry as zeros).
+export const taskCountsForWorkspace = async (workspaceId) => {
+  const rows = await tasksRepository.countTasksByWorkspace(workspaceId);
+  const counts = {};
+  for (const { _id, count } of rows) {
+    const entry = (counts[_id.project] ??= { todo: 0, 'in-progress': 0, 'in-review': 0, done: 0, total: 0 });
+    entry[_id.status] = count;
+    entry.total += count;
+  }
+  return counts;
+};
+
 export const getTask = async (taskId, ctx) => {
   const task = await tasksRepository.findTaskByIdWithPeople(taskId);
   if (!task) throw taskNotFound();

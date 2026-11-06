@@ -18,6 +18,10 @@ export const list = asyncHandler(async (req, res) => {
   sendSuccess(res, result);
 });
 
+export const counts = asyncHandler(async (req, res) => {
+  sendSuccess(res, { counts: await tasksService.taskCountsForWorkspace(req.workspace.id) });
+});
+
 // ... and task routes (/tasks/:id), where req.task is also set.
 
 export const get = asyncHandler(async (req, res) => {

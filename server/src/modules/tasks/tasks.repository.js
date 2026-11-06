@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Task from './tasks.model.js';
 
 // Only these fields of a person are ever loaded for display.
@@ -15,6 +16,13 @@ export const listTasks = (projectId, filter) =>
   Task.find({ project: projectId, ...filter })
     .sort({ position: 1, _id: 1 })
     .populate('assignees', PERSON_FIELDS);
+
+// Tasks per project and column for a whole workspace: [{ _id: { project, status }, count }]. One grouped query.
+export const countTasksByWorkspace = (workspaceId) =>
+  Task.aggregate([
+    { $match: { workspace: new mongoose.Types.ObjectId(String(workspaceId)) } },
+    { $group: { _id: { project: '$project', status: '$status' }, count: { $sum: 1 } } },
+  ]);
 
 export const countTasksByProject = (projectId) => Task.countDocuments({ project: projectId });
 
