@@ -513,3 +513,48 @@ describe('clean-up after other modules', () => {
     expect((await list(member.token, project._id)).status).toBe(404);
   });
 });
+
+describe('GET /workspaces/:workspaceId/task-counts', () => {
+  const counts = (token, workspaceId) =>
+    http().get(`${BASE}/workspaces/${workspaceId}/task-counts`).set(authed(token));
+
+  it('counts tasks per project and column, leaving out projects without tasks', async () => {
+    const { owner, member, project, workspace } = await team();
+    const empty = await createProject(owner.token, workspace._id, { name: 'Empty' });
+    await makeTask(member.token, project._id, { title: 'a' });
+    await makeTask(member.token, project._id, { title: 'b' });
+    await makeTask(member.token, project._id, { title: 'c', status: 'done' });
+
+    const res = await counts(member.token, workspace._id);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.counts[project._id]).toEqual({ todo: 2, 'in-progress': 0, 'in-review': 0, done: 1, total: 3 });
+    expect(res.body.data.counts[empty._id]).toBeUndefined();
+  });
+
+  it('follows moves and deletes', async () => {
+    const { member, project, workspace } = await team();
+    const task = await makeTask(member.token, project._id);
+    await move(member.token, task._id, { status: 'in-progress' });
+
+    let res = await counts(member.token, workspace._id);
+    expect(res.body.data.counts[project._id]).toMatchObject({ todo: 0, 'in-progress': 1, total: 1 });
+
+    await remove(member.token, task._id);
+    res = await counts(member.token, workspace._id);
+    expect(res.body.data.counts[project._id]).toBeUndefined();
+  });
+
+  it("never includes another workspace's projects, and hides the workspace from non-members", async () => {
+    const mine = await team();
+    const other = await team();
+    await makeTask(other.member.token, other.project._id);
+
+    const res = await counts(mine.member.token, mine.workspace._id);
+    expect(res.body.data.counts).toEqual({});
+
+    expect((await counts(mine.member.token, other.workspace._id)).status).toBe(404);
+    expect((await http().get(`${BASE}/workspaces/${mine.workspace._id}/task-counts`)).status).toBe(401);
+    expect((await counts(mine.member.token, 'nope')).status).toBe(400);
+  });
+});
