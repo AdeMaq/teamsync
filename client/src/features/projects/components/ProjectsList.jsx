@@ -7,6 +7,7 @@ import Spinner from '../../../shared/ui/Spinner';
 import TextField from '../../../shared/ui/TextField';
 import { useDebounce } from '../../../shared/hooks/useDebounce';
 import { ROUTES } from '../../../app/routes/routePaths';
+import { useGetTaskCountsQuery } from '../../tasks';
 import { useListProjectsQuery } from '../api/projectApi';
 import { PAGE_SIZE, SORTS, STATUSES } from '../constants';
 import ProjectCard from './ProjectCard';
@@ -28,6 +29,7 @@ export default function ProjectsList({ workspaceId }) {
 
   const params = { workspaceId, sort, page, limit: PAGE_SIZE, ...(q && { q }), ...(status && { status }) };
   const { data, isLoading, isFetching, isError, refetch } = useListProjectsQuery(params);
+  const { data: taskCounts } = useGetTaskCountsQuery(workspaceId, { skip: !workspaceId });
 
   const filtered = Boolean(q || status);
   const projects = data?.projects ?? [];
@@ -87,7 +89,7 @@ export default function ProjectsList({ workspaceId }) {
             aria-busy={isFetching}
           >
             {projects.map((project) => (
-              <ProjectCard key={project._id} project={project} />
+              <ProjectCard key={project._id} project={project} taskCounts={taskCounts?.[project._id]} />
             ))}
           </div>
 

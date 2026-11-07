@@ -161,7 +161,7 @@ Indexes are defined in migrations, **not** in the Mongoose schemas, so there is 
 | Profile (photo, name, email, password, delete account) | Done |
 | Workspaces (create, switch, logo, members, invitations, roles, ownership transfer, settings, plan member limits) | Done, backend and client |
 | Projects (create, list with search, filters and paging, edit, delete, lead hand-over) | Done, backend and client |
-| Tasks (create, list, edit, move and reorder across Kanban columns, delete) | Done, backend and client (drag-and-drop board with priority/assignee filters) |
+| Tasks (create, list, edit, move and reorder across Kanban columns, delete, project task counts & progress) | Done, backend and client (drag-and-drop board with priority/assignee filters, project card progress) |
 | Automated tests (server) | 270 tests: auth, profile, password reset, workspaces, permissions, logo upload, plan limits, projects and tasks |
 | Comments | Not started |
 | Real-time messaging, notifications, dashboard | Not started |
