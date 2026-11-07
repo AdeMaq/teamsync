@@ -279,6 +279,11 @@ Rules:
 - **Filters** (priority, assignee incl. "Unassigned") run on the client over the full list the API returns. Create/edit/delete in `TaskModal`; the Delete button follows the server's `canDelete`. A task's column changes only by dragging.
 - **Not done:** keyboard-only moving of cards (cards open with Enter, but moving needs a mouse or touch drag-and-drop support), touch drag on mobile, client tests, comments.
 
+### 2026-11-07 - Task counts per project (backend + client)
+- **Backend:** `GET /api/v1/workspaces/:workspaceId/task-counts` returns task totals per project and Kanban column in one grouped aggregation query (`Task.aggregate`), leaving out projects without tasks. Guarded by `requireWorkspacePermission('task:view', 'workspaceId')`.
+- **Client:** `taskApi.js` gained `getTaskCounts` query (`useGetTaskCountsQuery`), tagged with `{ type: 'Tasks', id: 'COUNTS' }` and `{ type: 'Projects', id: workspaceId }`. Cache is invalidated when tasks are created, moved, or deleted, or when projects change.
+- **UI:** `ProjectsList.jsx` queries task counts for the active workspace; `ProjectCard.jsx` displays task completion (`X of Y tasks done` or `No tasks`), percentage, and an accessible progress bar with brand gradient.
+- **Tests:** 45 backend integration tests in `server/src/tests/integration/tasks.test.js` covering column grouping, moves, deletes, and tenant isolation.
+
 ### Known issues carried over
 - Client has both `tailwindcss@3` and `@tailwindcss/vite@4` installed; only v3 is used.
-- `/forgot-password` link on LoginPage has no route yet.

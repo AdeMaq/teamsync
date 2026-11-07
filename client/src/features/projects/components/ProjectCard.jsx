@@ -5,8 +5,11 @@ import { assetUrl } from '../../../shared/utils/assetUrl';
 import { formatDateRange, projectPath } from '../utils';
 import StatusBadge from './StatusBadge';
 
-export default function ProjectCard({ project }) {
+export default function ProjectCard({ project, taskCounts }) {
   const { lead } = project;
+  const total = taskCounts?.total ?? 0;
+  const done = taskCounts?.done ?? 0;
+  const progress = total > 0 ? Math.round((done / total) * 100) : 0;
 
   return (
     <Card as={Link} to={projectPath(project._id)} className="flex flex-col p-5 hover:bg-white/[0.02]">
@@ -23,6 +26,26 @@ export default function ProjectCard({ project }) {
       <p className="mt-2 line-clamp-2 min-h-[2.5rem] text-sm text-dash-muted">
         {project.description || 'No description yet.'}
       </p>
+
+      <div className="mt-4">
+        <div className="flex items-center justify-between text-xs text-dash-muted">
+          <span>{total === 0 ? 'No tasks' : `${done} of ${total} tasks done`}</span>
+          {total > 0 && <span className="font-medium text-dash-text">{progress}%</span>}
+        </div>
+        <div
+          className="mt-1.5 h-1.5 w-full rounded-full bg-dash-track"
+          role="progressbar"
+          aria-valuenow={progress}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label={`${project.name} task progress`}
+        >
+          <div
+            className="h-full rounded-full bg-dash-gradient transition-all duration-300"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      </div>
 
       <div className="mt-4 flex items-center justify-between gap-3 border-t border-dash-border pt-3">
         {lead ? (
