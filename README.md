@@ -163,11 +163,11 @@ Indexes are defined in migrations, **not** in the Mongoose schemas, so there is 
 | Projects (create, list with search, filters and paging, edit, delete, lead hand-over) | Done, backend and client |
 | Tasks (create, list, edit, move and reorder across Kanban columns, delete, project task counts & progress) | Done, backend and client (drag-and-drop board with priority/assignee filters, project card progress) |
 | Automated tests (server) | 270 tests: auth, profile, password reset, workspaces, permissions, logo upload, plan limits, projects and tasks |
-| Comments | Not started |
+| Comments (add, list, edit, delete on tasks) | Backend done; the comment thread in the task dialog is next |
 | Real-time messaging, notifications, dashboard | Not started |
 | CI, client tests, Dockerfiles for the apps | Not started |
 
-Next up: comments on tasks.
+Next up: the comment thread in the task dialog (client).
 
 ## Troubleshooting
 

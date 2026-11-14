@@ -52,6 +52,9 @@ export const renumberColumn = (orderedIds, step, movedId, status) =>
     }))
   );
 
+export const taskIdsByProject = async (projectId) =>
+  (await Task.find({ project: projectId }).select('_id').lean()).map((t) => t._id);
+
 export const deleteTaskById = (id) => Task.deleteOne({ _id: id });
 
 // ---- Cleanup after other modules' events ----

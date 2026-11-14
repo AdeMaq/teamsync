@@ -2,6 +2,8 @@ import ApiError from '../../core/errors/ApiError.js';
 import { ERROR_CODES } from '../../core/errors/errorTypes.js';
 import { HTTP } from '../../core/constants/httpStatusCodes.js';
 import { can } from '../../core/constants/permissions.js';
+import { eventBus } from '../../events/eventBus.js';
+import { EVENTS } from '../../events/eventNames.js';
 import { findProject, isLead } from '../projects/index.js';
 import { getMembership } from '../workspaces/index.js';
 import * as tasksRepository from './tasks.repository.js';
@@ -152,11 +154,18 @@ export const moveTask = async (task, ctx, { status, index }) => {
   return getTask(task.id, ctx);
 };
 
-export const deleteTask = (task) => tasksRepository.deleteTaskById(task.id);
+export const deleteTask = async (task) => {
+  await eventBus.emit(EVENTS.TASK_DELETED, { taskIds: [task.id] }); // its comments go too
+  await tasksRepository.deleteTaskById(task.id);
+};
 
 // ---- Clean-up after events from other modules (called by tasks.events.js) ----
 
-export const handleProjectDeleted = (projectId) => tasksRepository.deleteTasksByProject(projectId);
+export const handleProjectDeleted = async (projectId) => {
+  const taskIds = await tasksRepository.taskIdsByProject(projectId);
+  if (taskIds.length) await eventBus.emit(EVENTS.TASK_DELETED, { taskIds }); // their comments go too
+  await tasksRepository.deleteTasksByProject(projectId);
+};
 
 // Deleting a workspace removes its projects without a PROJECT_DELETED event each, so its tasks go with it here.
 export const handleWorkspaceDeleted = (workspaceId) => tasksRepository.deleteTasksByWorkspace(workspaceId);

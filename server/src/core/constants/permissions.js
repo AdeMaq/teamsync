@@ -20,6 +20,11 @@ export const PERMISSIONS = Object.freeze({
   'task:update': ROLES.MEMBER,
   // Delete any task. Without this role, only the task's creator or its project's lead may (see tasks.service.js).
   'task:delete': ROLES.ADMIN,
+  // Everyone in the workspace can read and write comments. Editing is the author's alone; deleting also needs the
+  // author, or this role (see comments.middleware.js).
+  'comment:view': ROLES.MEMBER,
+  'comment:create': ROLES.MEMBER,
+  'comment:delete': ROLES.ADMIN,
 });
 
 export const can = (role, action) => {
