@@ -285,5 +285,15 @@ Rules:
 - **UI:** `ProjectsList.jsx` queries task counts for the active workspace; `ProjectCard.jsx` displays task completion (`X of Y tasks done` or `No tasks`), percentage, and an accessible progress bar with brand gradient.
 - **Tests:** 45 backend integration tests in `server/src/tests/integration/tasks.test.js` covering column grouping, moves, deletes, and tenant isolation.
 
+### 2026-11-14 - Comments module (backend)
+- **Endpoints:** `POST|GET /api/v1/tasks/:id/comments` (add, list), `PATCH|DELETE /api/v1/comments/:id`. The task routes use `requireTaskPermission`; the comment routes use the new `requireCommentPermission(action)` (comments module), which finds the workspace through the comment and answers non-members with the same 404 as a missing comment.
+- **Who can do what (defaults chosen by the developer, change them in `permissions.js` / `comments.service.js`):** every workspace member can read and add comments (`comment:view`, `comment:create`). **Only the author can edit** (even admins cannot change someone else's words). The author, or a workspace admin/owner (`comment:delete`, moderation), can delete.
+- **List:** paged (`page`, `limit` default 50, max 100), oldest first like a conversation. Each comment has `author` (name/email/avatar, or `null` when the account is gone), `editedAt`, and `canEdit` / `canDelete` computed for the caller.
+- **Deleting is permanent** (the model's `deletedAt` field is not used). `mentions` exists in the model but has no API yet; it belongs with notifications.
+- **Events:** new `TASK_DELETED { taskIds }`, emitted by the tasks module when one task is deleted and before a project's tasks are deleted (comments have no project field, so they cannot find them on `PROJECT_DELETED` alone). Comments listen for it and for `WORKSPACE_DELETED`. A deleted account keeps its comments, shown without an author, so threads stay readable.
+- **Migration:** none needed; `task + createdAt` is already indexed.
+- **Tests:** `tests/integration/comments.test.js` (create, validation, list and paging, edit and delete rules, tenant isolation, clean-ups) and comment rows in the permission-table unit test. The integration tests were written without a database available and have not been run yet.
+- **Not done:** the comments UI, mentions, notifications for new comments.
+
 ### Known issues carried over
 - Client has both `tailwindcss@3` and `@tailwindcss/vite@4` installed; only v3 is used.
