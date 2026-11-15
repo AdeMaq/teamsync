@@ -4,6 +4,7 @@ import SelectField from '../../../shared/ui/SelectField';
 import TextAreaField from '../../../shared/ui/TextAreaField';
 import TextField from '../../../shared/ui/TextField';
 import { parseApiError } from '../../../shared/api/errors';
+import { CommentThread } from '../../comments';
 import { COLUMNS, PRIORITIES } from '../constants';
 import { useCreateTaskMutation, useDeleteTaskMutation, useUpdateTaskMutation } from '../api/taskApi';
 import { toDateInput } from '../utils';
@@ -89,14 +90,13 @@ export default function TaskModal({ projectId, task, status, members, onClose })
       className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 p-4 sm:items-center"
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
     >
-      <form
+      <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="task-modal-title"
-        onSubmit={handleSubmit}
-        noValidate
-        className="w-full max-w-lg space-y-4 rounded-2xl border border-dash-border bg-dash-card p-5"
+        className="w-full max-w-lg rounded-2xl border border-dash-border bg-dash-card p-5"
       >
+      <form onSubmit={handleSubmit} noValidate className="space-y-4">
         <h2 id="task-modal-title" className="font-display text-lg font-semibold text-dash-text">
           {editing ? 'Edit task' : 'New task'}
         </h2>
@@ -159,6 +159,10 @@ export default function TaskModal({ projectId, task, status, members, onClose })
           )}
         </div>
       </form>
+
+      {/* Outside the form (forms cannot nest); only existing tasks have a thread. */}
+      {editing && <CommentThread taskId={task._id} />}
+      </div>
     </div>
   );
 }

@@ -295,5 +295,12 @@ Rules:
 - **Tests:** `tests/integration/comments.test.js` (create, validation, list and paging, edit and delete rules, tenant isolation, clean-ups) and comment rows in the permission-table unit test. The integration tests were written without a database available and have not been run yet.
 - **Not done:** the comments UI, mentions, notifications for new comments.
 
+### 2026-11-15 - Comments thread (client)
+- **Where:** `client/src/features/comments` (`api/commentApi.js`, `components/{CommentThread,CommentItem,CommentForm}.jsx`), shown under the form in `TaskModal` for existing tasks. New cache tag `Comments` (one per task).
+- **Behaviour:** oldest first; Ctrl/Cmd+Enter sends; Edit shows only when the server's `canEdit` is true and Delete (with a confirm step) when `canDelete` is true; edited comments say "(edited)"; a deleted author shows as "Deleted user". The 5000-character limit shows a counter near the end.
+- **Paging:** "Load more comments" opens the next page of 50. Each page is its own cached query under the same tag, so any add/edit/delete refetches every open page; after adding, the page holding the new comment is opened.
+- **Modal change:** the dialog element is now a `div` holding the task form and the thread, because forms cannot nest.
+- **Not done:** live updates (a comment by someone else appears on the next open or action; real time comes with the socket work), comment counts on cards, mentions, client tests. Pressing Escape closes the whole dialog, including an unsent comment draft.
+
 ### Known issues carried over
 - Client has both `tailwindcss@3` and `@tailwindcss/vite@4` installed; only v3 is used.
