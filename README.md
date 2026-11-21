@@ -164,10 +164,11 @@ Indexes are defined in migrations, **not** in the Mongoose schemas, so there is 
 | Tasks (create, list, edit, move and reorder across Kanban columns, delete, project task counts & progress) | Done, backend and client (drag-and-drop board with priority/assignee filters, project card progress) |
 | Automated tests (server) | 270 tests: auth, profile, password reset, workspaces, permissions, logo upload, plan limits, projects and tasks |
 | Comments (add, list, edit, delete on tasks) | Done, backend and client (thread in the task dialog) |
-| Real-time messaging, notifications, dashboard | Not started |
+| Dashboard | Backend done (`GET /workspaces/:id/dashboard`); the screen still shows sample data until it is wired up |
+| Real-time messaging, notifications | Not started |
 | CI, client tests, Dockerfiles for the apps | Not started |
 
-Next up: the dashboard backend (real stats instead of mock data).
+Next up: wire the dashboard screen to the new endpoint (client).
 
 ## Troubleshooting
 

@@ -59,6 +59,16 @@ const assertDateOrder = (startDate, endDate) => {
 
 export const findProject = (id) => projectsRepository.findProjectById(id);
 
+// For the dashboard (through projects/index.js): the workspace's projects that are not archived.
+export const listLiveProjects = async (workspaceId) =>
+  (await projectsRepository.listLiveProjects(workspaceId)).map((p) => ({
+    _id: String(p._id),
+    name: p.name,
+    color: p.color,
+    status: p.status,
+    endDate: p.endDate ?? null,
+  }));
+
 // ---- Projects ----
 
 export const createProject = async (workspaceId, userId, workspaceRole, data) => {

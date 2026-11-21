@@ -302,5 +302,16 @@ Rules:
 - **Modal change:** the dialog element is now a `div` holding the task form and the thread, because forms cannot nest.
 - **Not done:** live updates (a comment by someone else appears on the next open or action; real time comes with the socket work), comment counts on cards, mentions, client tests. Pressing Escape closes the whole dialog, including an unsent comment draft.
 
+### 2026-11-21 - Dashboard module (backend)
+- **Endpoint:** `GET /api/v1/workspaces/:workspaceId/dashboard`, read-only, open to every workspace member (`workspace:view`). Non-members get the usual 404.
+- **Response:** `stats` (`activeProjects`, `openTasks`, `dueThisWeek`, `overdueTasks`, `completedLast30Days`, `completedPrevious30Days`), `weeklyThroughput` (6 weeks, oldest first, `{ weekStart, value }`), `activity` (newest 10), `projectHealth` (up to 5 non-archived projects, most recently updated first: `openTasks`, `totalTasks`, `overdueTasks`, `progress` %, `health` = `on-track | at-risk | shipped`) and `workload` (open tasks per person, top 6).
+- **How it is built:** the dashboard module owns no data. Its service combines small read-only functions that the owning modules export through their `index.js`: `dashboardNumbers` and `taskTitles` (tasks), `listLiveProjects` (projects), `recentComments` (comments), `getMemberProfiles` (workspaces). The counting itself is a handful of grouped queries in `tasks.repository.js`, not a scan of every task.
+- **Rules chosen by the developer (change in `dashboard.service.js` / `tasks.service.js`):** a project is `at-risk` when it has overdue tasks, or its end date has passed with work still open; `shipped` when its status is `completed`. A task is overdue when it is not done and its due day is before today. "Done in the last 30 days" and the weekly bars use when a task was finished. Days and weeks are UTC; weeks start on Monday.
+- **New field `Task.completedAt`:** set when a task enters "done" (by moving it, or creating it there), cleared when it leaves, kept when it is only reordered inside "done". Tasks finished before this change have none, so the dashboard falls back to their `updatedAt` for them (no migration; an edit to such a task can shift its date).
+- **Activity feed is derived, not logged:** it merges newly created tasks and new comments. Moves, completions and invitations are not in it, because nothing records them yet; a real activity log would be its own module. Someone who left the workspace shows as `actor: null`.
+- **Dropped from the mock:** "Team velocity" (there are no story points); the fourth card becomes `overdueTasks`.
+- **Tests:** `tests/integration/dashboard.test.js` (empty workspace, counts, finished-task windows, `completedAt` rules, workload, project health, feed, tenant isolation, access) and `tests/unit/dashboard.test.js` (project health rule). The integration tests were written without a database available and have not been run yet.
+- **Not done:** wiring the dashboard screen to the endpoint (it still uses `mockData.js`), caching, a per-project dashboard.
+
 ### Known issues carried over
 - Client has both `tailwindcss@3` and `@tailwindcss/vite@4` installed; only v3 is used.

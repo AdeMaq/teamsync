@@ -32,6 +32,14 @@ const toComment = (comment, { role, userId }) => ({
 
 export const findComment = (id) => commentsRepository.findCommentById(id);
 
+// For the dashboard (through comments/index.js): the newest comments of a workspace.
+export const recentComments = async (workspaceId, limit) =>
+  (await commentsRepository.recentComments(workspaceId, limit)).map((c) => ({
+    taskId: String(c.task),
+    userId: String(c.author),
+    at: c.createdAt,
+  }));
+
 // ---- Comments ----
 
 export const createComment = async (task, ctx, { text }) => {

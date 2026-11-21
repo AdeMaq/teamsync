@@ -54,6 +54,12 @@ const assertAssignable = async (workspaceId, assigneeId) => {
   }
 };
 
+// Entering "done" stamps the time, leaving it clears the stamp, and moving inside "done" keeps it.
+const completedAtAfterMove = (task, newStatus) => {
+  if (newStatus !== 'done') return null;
+  return task.status === 'done' ? (task.completedAt ?? null) : new Date();
+};
+
 const withAssignees = (assigneeId) => (assigneeId ? [assigneeId] : []);
 
 // ---- API used by the access middleware ----
@@ -83,6 +89,7 @@ export const createTask = async (project, ctx, { assigneeId, ...data }) => {
     createdBy: ctx.userId,
     assignees: withAssignees(assigneeId),
     position: last === null ? STEP : last + STEP, // the bottom of its column
+    ...(data.status === 'done' && { completedAt: new Date() }),
   });
 
   return toTask(await tasksRepository.findTaskByIdWithPeople(created.id), ctx);
@@ -114,6 +121,80 @@ export const taskCountsForWorkspace = async (workspaceId) => {
   return counts;
 };
 
+// ---- Numbers for the dashboard (called through tasks/index.js by the dashboard module) ----
+
+const DAY = 24 * 60 * 60 * 1000;
+const dayStart = (date) => new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+const dayKey = (date) => date.toISOString().slice(0, 10);
+
+// Monday 00:00 UTC of the week containing `date`.
+const weekStart = (date) => {
+  const day = dayStart(date);
+  return new Date(day.getTime() - ((day.getUTCDay() + 6) % 7) * DAY);
+};
+
+export const WEEKS_SHOWN = 6;
+export const WORKLOAD_SHOWN = 6;
+export const RECENT_TASKS_SHOWN = 10;
+
+export const dashboardNumbers = async (workspaceId, now = new Date()) => {
+  const today = dayStart(now);
+  const firstWeek = new Date(weekStart(now).getTime() - (WEEKS_SHOWN - 1) * 7 * DAY);
+  const since = new Date(Math.min(firstWeek.getTime(), today.getTime() - 59 * DAY));
+
+  const [totals, perAssignee, perDay, dueThisWeek, recent] = await Promise.all([
+    tasksRepository.projectTaskTotals(workspaceId, today),
+    tasksRepository.openTasksPerAssignee(workspaceId, WORKLOAD_SHOWN),
+    tasksRepository.completedPerDay(workspaceId, since),
+    tasksRepository.countOpenDueBetween(workspaceId, today, new Date(today.getTime() + 7 * DAY)),
+    tasksRepository.recentTasks(workspaceId, RECENT_TASKS_SHOWN),
+  ]);
+
+  const perProject = {};
+  let openTasks = 0;
+  let overdueTasks = 0;
+  for (const row of totals) {
+    perProject[row._id] = { total: row.total, done: row.done, open: row.total - row.done, overdue: row.overdue };
+    openTasks += row.total - row.done;
+    overdueTasks += row.overdue;
+  }
+
+  // Completed tasks: last 30 days, the 30 before that, and per week (oldest week first).
+  const thirtyAgo = dayKey(new Date(today.getTime() - 29 * DAY));
+  const sixtyAgo = dayKey(new Date(today.getTime() - 59 * DAY));
+  const weeks = Array.from({ length: WEEKS_SHOWN }, (_, i) => ({
+    weekStart: dayKey(new Date(firstWeek.getTime() + i * 7 * DAY)),
+    value: 0,
+  }));
+  let completedLast30Days = 0;
+  let completedPrevious30Days = 0;
+  for (const { _id: day, count } of perDay) {
+    if (day >= thirtyAgo) completedLast30Days += count;
+    else if (day >= sixtyAgo) completedPrevious30Days += count;
+
+    const week = weeks.findLast((w) => w.weekStart <= day);
+    if (week && day >= weeks[0].weekStart) week.value += count;
+  }
+
+  return {
+    perProject,
+    openTasks,
+    overdueTasks,
+    dueThisWeek,
+    completedLast30Days,
+    completedPrevious30Days,
+    weeks,
+    workload: perAssignee.map(({ _id, count }) => ({ userId: String(_id), tasks: count })),
+    recentTasks: recent.map((t) => ({ taskId: String(t._id), title: t.title, projectId: String(t.project), userId: String(t.createdBy), at: t.createdAt })),
+  };
+};
+
+// { [taskId]: { title, projectId } } for the given tasks of a workspace.
+export const taskTitles = async (workspaceId, taskIds) => {
+  const rows = taskIds.length ? await tasksRepository.titlesOf(workspaceId, taskIds) : [];
+  return Object.fromEntries(rows.map((t) => [String(t._id), { title: t.title, projectId: String(t.project) }]));
+};
+
 export const getTask = async (taskId, ctx) => {
   const task = await tasksRepository.findTaskByIdWithPeople(taskId);
   if (!task) throw taskNotFound();
@@ -140,14 +221,14 @@ export const moveTask = async (task, ctx, { status, index }) => {
   if (above !== undefined && below !== undefined && below - above < MIN_GAP * 2) {
     const ordered = column.map((t) => t._id);
     ordered.splice(at, 0, task._id);
-    await tasksRepository.renumberColumn(ordered, STEP, task._id, status);
+    await tasksRepository.renumberColumn(ordered, STEP, task._id, status, completedAtAfterMove(task, status));
   } else {
     let position = STEP; // an empty column
     if (above === undefined && below !== undefined) position = below - STEP;
     else if (above !== undefined && below === undefined) position = above + STEP;
     else if (above !== undefined && below !== undefined) position = (above + below) / 2;
 
-    const updated = await tasksRepository.updateTaskById(task.id, { status, position });
+    const updated = await tasksRepository.updateTaskById(task.id, { status, position, completedAt: completedAtAfterMove(task, status) });
     if (!updated) throw taskNotFound();
   }
 

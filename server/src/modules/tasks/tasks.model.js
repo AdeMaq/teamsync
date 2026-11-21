@@ -18,6 +18,8 @@ const taskSchema = new mongoose.Schema(
     priority: { type: String, enum: ['low', 'medium', 'high', 'urgent'], default: 'medium' },
     labels: [{ type: String, trim: true }],
     dueDate: { type: Date },
+    // When the task last entered "done" (cleared when it leaves). Older done tasks have none; the dashboard falls back to updatedAt.
+    completedAt: { type: Date },
     position: { type: Number, default: 0 }, // ordering within a Kanban column
     // Bounded list -> embedded. Enforce a cap in the service (e.g. 20 per task).
     attachments: [

@@ -36,6 +36,13 @@ export const listProjects = async (workspaceId, { status, q, sort }, { skip, lim
   return { projects, total };
 };
 
+// The projects of a workspace as the dashboard needs them (not archived), most recently updated first.
+export const listLiveProjects = (workspaceId) =>
+  Project.find({ workspace: workspaceId, status: { $ne: 'archived' } })
+    .sort({ updatedAt: -1, _id: 1 })
+    .select('name color status endDate')
+    .lean();
+
 export const updateProjectById = (id, data) =>
   Project.findByIdAndUpdate(id, { $set: data }, { returnDocument: 'after', runValidators: true });
 

@@ -5,3 +5,5 @@ export { default as workspacesRoutes } from './workspaces.routes.js';
 export { requireWorkspacePermission } from './workspaces.middleware.js';
 // For modules that need to look up one person's role in a workspace (e.g. to guard /projects/:id).
 export { getMembership } from './workspaces.service.js';
+// Read-only member names and pictures for the dashboard.
+export { getMemberProfiles } from './workspaces.service.js';

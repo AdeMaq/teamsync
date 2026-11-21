@@ -19,6 +19,9 @@ export const listComments = async (taskId, { skip, limit }) => {
   return { comments, total };
 };
 
+export const recentComments = (workspaceId, limit) =>
+  Comment.find({ workspace: workspaceId }).sort({ createdAt: -1 }).limit(limit).select('author task createdAt').lean();
+
 export const updateCommentText = (id, text) =>
   Comment.findByIdAndUpdate(id, { $set: { text, editedAt: new Date() } }, { returnDocument: 'after', runValidators: true });
 

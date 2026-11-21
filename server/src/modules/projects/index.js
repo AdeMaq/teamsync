@@ -5,3 +5,5 @@ export { projectsRouter, workspaceProjectsRouter } from './projects.routes.js';
 export { requireProjectPermission } from './projects.middleware.js';
 // For modules that decide things about a project's tasks: load a project, and ask who leads it.
 export { findProject, isLead } from './projects.service.js';
+// Read-only list for the dashboard.
+export { listLiveProjects } from './projects.service.js';
