@@ -91,6 +91,16 @@ export const getMembership = async (workspaceId, userId) => {
   return membership ? { workspace, membership } : null;
 };
 
+// For the dashboard (through workspaces/index.js): { [userId]: { _id, name, avatar } } for every current member.
+export const getMemberProfiles = async (workspaceId) => {
+  const workspace = await workspacesRepository.findWorkspaceByIdWithMembers(workspaceId);
+  const profiles = {};
+  for (const { user } of workspace?.members ?? []) {
+    if (user?._id) profiles[String(user._id)] = { _id: String(user._id), name: user.name, avatar: user.avatar ?? '' };
+  }
+  return profiles;
+};
+
 // ---- Workspaces ----
 
 const requireFreeSlug = async (slug) => {
