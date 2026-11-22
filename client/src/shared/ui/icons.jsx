@@ -130,3 +130,10 @@ export const ChevronDownIcon = make(<path d="m6 9 6 6 6-6" />);
 export const PlusIcon = make(<path d="M12 5v14M5 12h14" />);
 
 export const CheckIcon = make(<path d="m5 12.5 4.5 4.5L19 7.5" />);
+
+export const AlertIcon = make(
+  <>
+    <path d="M12 4 3 19h18z" />
+    <path d="M12 10v4M12 17h.01" />
+  </>
+);

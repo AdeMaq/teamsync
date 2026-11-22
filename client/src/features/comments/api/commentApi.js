@@ -17,7 +17,7 @@ export const commentApi = baseApi.injectEndpoints({
     addComment: build.mutation({
       query: ({ taskId, text }) => ({ url: `/tasks/${taskId}/comments`, method: 'POST', body: { text } }),
       transformResponse: (response) => unwrap(response).comment,
-      invalidatesTags: (_result, _error, { taskId }) => [{ type: 'Comments', id: taskId }],
+      invalidatesTags: (_result, _error, { taskId }) => [{ type: 'Comments', id: taskId }, 'Dashboard'],
     }),
 
     editComment: build.mutation({
@@ -28,7 +28,7 @@ export const commentApi = baseApi.injectEndpoints({
 
     deleteComment: build.mutation({
       query: ({ id }) => ({ url: `/comments/${id}`, method: 'DELETE' }),
-      invalidatesTags: (_result, _error, { taskId }) => [{ type: 'Comments', id: taskId }],
+      invalidatesTags: (_result, _error, { taskId }) => [{ type: 'Comments', id: taskId }, 'Dashboard'],
     }),
   }),
 });
