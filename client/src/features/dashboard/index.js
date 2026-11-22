@@ -4,4 +4,5 @@ export { default as ActivityChart } from './components/ActivityChart';
 export { default as ActivityFeed } from './components/ActivityFeed';
 export { default as ProjectHealth } from './components/ProjectHealth';
 export { default as Workload } from './components/Workload';
-export { STATS, WEEKLY_THROUGHPUT, ACTIVITY, PROJECT_HEALTH, WORKLOAD } from './mockData';
+export { useGetDashboardQuery } from './api/dashboardApi';
+export { toStats, toWeeks, toActivity, toProjects, toPeople } from './utils';

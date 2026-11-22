@@ -31,6 +31,7 @@ export const taskApi = baseApi.injectEndpoints({
       invalidatesTags: (_result, _error, { projectId }) => [
         { type: 'Tasks', id: projectId },
         { type: 'Tasks', id: 'COUNTS' },
+        'Dashboard',
       ],
     }),
 
@@ -38,7 +39,7 @@ export const taskApi = baseApi.injectEndpoints({
     updateTask: build.mutation({
       query: ({ id, projectId: _projectId, ...body }) => ({ url: `/tasks/${id}`, method: 'PATCH', body }),
       transformResponse: (response) => unwrap(response).task,
-      invalidatesTags: (_result, _error, { projectId }) => [{ type: 'Tasks', id: projectId }],
+      invalidatesTags: (_result, _error, { projectId }) => [{ type: 'Tasks', id: projectId }, 'Dashboard'],
     }),
 
     // { id, projectId, status, index } - `index` is the place in the destination column (0 = top), left out = bottom.
@@ -65,6 +66,7 @@ export const taskApi = baseApi.injectEndpoints({
       invalidatesTags: (_result, _error, { projectId }) => [
         { type: 'Tasks', id: projectId },
         { type: 'Tasks', id: 'COUNTS' },
+        'Dashboard',
       ],
     }),
 
@@ -73,6 +75,7 @@ export const taskApi = baseApi.injectEndpoints({
       invalidatesTags: (_result, _error, { projectId }) => [
         { type: 'Tasks', id: projectId },
         { type: 'Tasks', id: 'COUNTS' },
+        'Dashboard',
       ],
     }),
   }),

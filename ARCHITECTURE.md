@@ -313,5 +313,14 @@ Rules:
 - **Tests:** `tests/integration/dashboard.test.js` (empty workspace, counts, finished-task windows, `completedAt` rules, workload, project health, feed, tenant isolation, access) and `tests/unit/dashboard.test.js` (project health rule). The integration tests were written without a database available and have not been run yet.
 - **Not done:** wiring the dashboard screen to the endpoint (it still uses `mockData.js`), caching, a per-project dashboard.
 
+### 2026-11-22 - Dashboard screen (client)
+- **Where:** `features/dashboard` (`api/dashboardApi.js`, `utils.js`, the five components) and `pages/DashboardPage.jsx`. `mockData.js` is deleted. The page reads the active workspace (`useActiveWorkspace`) and calls `GET /workspaces/:id/dashboard`; it refetches on every visit so other people's changes show up.
+- **Mapping:** `utils.js` turns the server response into the plain props the components take (`toStats`, `toWeeks`, `toActivity`, `toProjects`, `toPeople`), so the components stay presentational.
+- **Cards:** Active projects, Open tasks (with "due in the next 7 days"), Overdue (replaces "Team velocity"), Completed (30d) with the change against the 30 days before. Weekly bars are labelled with the Monday of each week (UTC).
+- **Refresh:** new cache tag `Dashboard`. Task create/update/move/delete, comment add/delete and project create/update/delete invalidate it. Editing a comment does not.
+- **States:** spinner while loading, an error card with "Try again", and an empty message in each card (new workspace, nothing assigned, no activity).
+- **Smaller changes:** the feed is titled "Recent activity" (it was "Live activity", but it is not live); someone who left shows as "Former member"; project and task names link to their project; the chart no longer breaks when every week is 0; new `AlertIcon` and `formatRelative` helpers.
+- **Not done:** live updates (comes with the socket work), a per-project dashboard, client tests. The sidebar workspace card, the navbar notification badge and search box, and the sprint subtitle in `navItems.jsx` are still static.
+
 ### Known issues carried over
 - Client has both `tailwindcss@3` and `@tailwindcss/vite@4` installed; only v3 is used.

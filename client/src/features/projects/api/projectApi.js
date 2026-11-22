@@ -21,7 +21,7 @@ export const projectApi = baseApi.injectEndpoints({
     createProject: build.mutation({
       query: ({ workspaceId, ...body }) => ({ url: `/workspaces/${workspaceId}/projects`, method: 'POST', body }),
       transformResponse: (response) => unwrap(response).project,
-      invalidatesTags: (_result, _error, { workspaceId }) => [{ type: 'Projects', id: workspaceId }],
+      invalidatesTags: (_result, _error, { workspaceId }) => [{ type: 'Projects', id: workspaceId }, 'Dashboard'],
     }),
 
     updateProject: build.mutation({
@@ -30,13 +30,14 @@ export const projectApi = baseApi.injectEndpoints({
       invalidatesTags: (project, _error, { id }) => [
         { type: 'Project', id },
         ...(project ? [{ type: 'Projects', id: project.workspace }] : []),
+        'Dashboard',
       ],
     }),
 
     // The project is gone afterwards, so only the list is refreshed (refetching its details would 404).
     deleteProject: build.mutation({
       query: ({ id }) => ({ url: `/projects/${id}`, method: 'DELETE' }),
-      invalidatesTags: (_result, _error, { workspaceId }) => [{ type: 'Projects', id: workspaceId }],
+      invalidatesTags: (_result, _error, { workspaceId }) => [{ type: 'Projects', id: workspaceId }, 'Dashboard'],
     }),
   }),
 });
