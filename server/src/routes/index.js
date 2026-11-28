@@ -5,6 +5,7 @@ import { projectsRouter, workspaceProjectsRouter } from '../modules/projects/ind
 import { projectTasksRouter, tasksRouter, workspaceTaskCountsRouter } from '../modules/tasks/index.js';
 import { commentsRouter, taskCommentsRouter } from '../modules/comments/index.js';
 import { dashboardRouter } from '../modules/dashboard/index.js';
+import { notificationsRouter } from '../modules/notifications/index.js';
 import { workspacesRoutes } from '../modules/workspaces/index.js';
 
 // Mounted at /api/v1 by app.js.
@@ -21,5 +22,6 @@ router.use('/projects', projectsRouter);
 router.use('/tasks/:id/comments', taskCommentsRouter);
 router.use('/tasks', tasksRouter);
 router.use('/comments', commentsRouter);
+router.use('/notifications', notificationsRouter);
 
 export default router;

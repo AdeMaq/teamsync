@@ -10,4 +10,12 @@ export const EVENTS = Object.freeze({
   // Tasks were deleted (one, or all of a project's). Comments of those tasks must listen and delete themselves.
   TASK_DELETED: 'task.deleted', // payload: { taskIds }
   PROJECT_DELETED: 'project.deleted', // payload: { projectId, workspaceId }
+  // Someone was given a task (on create, or the assignee changed). Notifications listen.
+  // payload: { workspaceId, projectId, taskId, taskTitle, assigneeId, actorId }
+  TASK_ASSIGNED: 'task.assigned',
+  // A comment was posted. `followerIds` = the task's creator and assignees; `mentionIds` = people @mentioned.
+  // payload: { workspaceId, projectId, taskId, taskTitle, commentId, authorId, excerpt, followerIds, mentionIds }
+  COMMENT_ADDED: 'comment.added',
+  // An edited comment now mentions people it did not before. payload: as COMMENT_ADDED, with only the new mentionIds.
+  COMMENT_MENTIONS_ADDED: 'comment.mentions_added',
 });

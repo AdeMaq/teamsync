@@ -60,6 +60,16 @@ const completedAtAfterMove = (task, newStatus) => {
   return task.status === 'done' ? (task.completedAt ?? null) : new Date();
 };
 
+const emitAssigned = (task, assigneeId, actorId) =>
+  eventBus.emit(EVENTS.TASK_ASSIGNED, {
+    workspaceId: idOf(task.workspace),
+    projectId: idOf(task.project),
+    taskId: idOf(task._id),
+    taskTitle: task.title,
+    assigneeId: idOf(assigneeId),
+    actorId: idOf(actorId),
+  });
+
 const withAssignees = (assigneeId) => (assigneeId ? [assigneeId] : []);
 
 // ---- API used by the access middleware ----
@@ -91,6 +101,8 @@ export const createTask = async (project, ctx, { assigneeId, ...data }) => {
     position: last === null ? STEP : last + STEP, // the bottom of its column
     ...(data.status === 'done' && { completedAt: new Date() }),
   });
+
+  if (assigneeId) await emitAssigned(created, assigneeId, ctx.userId);
 
   return toTask(await tasksRepository.findTaskByIdWithPeople(created.id), ctx);
 };
@@ -207,6 +219,9 @@ export const updateTask = async (task, ctx, { assigneeId, ...fields }) => {
   const changes = { ...fields, ...(assigneeId !== undefined && { assignees: withAssignees(assigneeId) }) };
   const updated = await tasksRepository.updateTaskById(task.id, changes);
   if (!updated) throw taskNotFound(); // deleted while editing
+
+  // Only a NEW assignee hears about it (re-saving the same person, or unassigning, sends nothing).
+  if (assigneeId && idOf(assigneeId) !== idOf(task.assignees[0])) await emitAssigned(updated, assigneeId, ctx.userId);
 
   return getTask(task.id, ctx);
 };

@@ -21,7 +21,8 @@ export const list = asyncHandler(async (req, res) => {
 // ... and comment routes (/comments/:id), where req.comment is set.
 
 export const update = asyncHandler(async (req, res) => {
-  const comment = await commentsService.updateComment(req.comment, contextOf(req), req.body);
+  const task = await commentsService.findTaskOf(req.comment);
+  const comment = await commentsService.updateComment(req.comment, task, contextOf(req), req.body);
   sendSuccess(res, { comment });
 });
 

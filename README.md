@@ -162,13 +162,14 @@ Indexes are defined in migrations, **not** in the Mongoose schemas, so there is 
 | Workspaces (create, switch, logo, members, invitations, roles, ownership transfer, settings, plan member limits) | Done, backend and client |
 | Projects (create, list with search, filters and paging, edit, delete, lead hand-over) | Done, backend and client |
 | Tasks (create, list, edit, move and reorder across Kanban columns, delete, project task counts & progress) | Done, backend and client (drag-and-drop board with priority/assignee filters, project card progress) |
-| Automated tests (server) | 270 tests: auth, profile, password reset, workspaces, permissions, logo upload, plan limits, projects and tasks |
+| Automated tests (server) | 333 tests: auth, profile, password reset, workspaces, permissions, logo upload, plan limits, projects, tasks, comments, dashboard and notifications |
 | Comments (add, list, edit, delete on tasks) | Done, backend and client (thread in the task dialog) |
 | Dashboard (stats, weekly throughput, activity, project health, workload) | Done, backend and client |
-| Real-time messaging, notifications | Not started |
+| Notifications (task assigned, comments, @mentions; list, unread count, mark read, delete) | Backend done; the bell in the navbar and real-time push are next |
+| Real-time messaging | Not started |
 | CI, client tests, Dockerfiles for the apps | Not started |
 
-Next up: notifications (with mentions in comments), then real-time messaging.
+Next up: the notification bell and @mention picker (client), then Socket.IO for real-time notifications and messaging.
 
 ## Troubleshooting
 
