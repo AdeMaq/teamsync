@@ -4,6 +4,8 @@ import mongoose from 'mongoose';
 const notificationSchema = new mongoose.Schema(
   {
     recipient: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    // The workspace it happened in, so leaving or deleting a workspace removes its notifications.
+    workspace: { type: mongoose.Schema.Types.ObjectId, ref: 'Workspace' },
     sender: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     type: {
       type: String,
